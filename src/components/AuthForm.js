@@ -250,8 +250,36 @@ export default function AuthForm() {
           textColor="success"
           centered
         >
-          <Tab label="Login" />
-          <Tab label="Register" />
+          <Tabs
+            value={tab}
+            onChange={handleTabChange}
+            indicatorColor="success"
+            textColor="success"
+            centered
+          >
+            <Tab
+              label="Login"
+              sx={{
+                fontWeight: tab === 0 ? "bold" : "normal",
+                color: tab === 0 ? "green" : "inherit",
+                backgroundColor:
+                  tab === 0 ? "rgba(76, 175, 80, 0.1)" : "transparent",
+                borderRadius: "16px",
+                transition: "all 0.3s ease",
+              }}
+            />
+            <Tab
+              label="Register"
+              sx={{
+                fontWeight: tab === 1 ? "bold" : "normal",
+                color: tab === 1 ? "green" : "inherit",
+                backgroundColor:
+                  tab === 1 ? "rgba(76, 175, 80, 0.1)" : "transparent",
+                borderRadius: "16px",
+                transition: "all 0.3s ease",
+              }}
+            />
+          </Tabs>
         </Tabs>
 
         {!otpSent ? (
