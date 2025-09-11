@@ -10,6 +10,10 @@ import {
 } from "@mui/material";
 import FarmIcon from "@mui/icons-material/Grass";
 import "../styles/AuthForm.css";
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "../styles/AuthForm.css";
 
 export default function AuthForm() {
   const [tab, setTab] = useState(0); // 0 = Login, 1 = Register
@@ -17,6 +21,8 @@ export default function AuthForm() {
   const [mobile, setMobile] = useState("");
   const [name, setName] = useState("");
   const otpInputsRef = useRef([]);
+
+  const API_BASE = "https://farmer-backend-dqit.onrender.com/api/auth";
 
   const handleTabChange = (event, newValue) => {
     setTab(newValue);
@@ -32,7 +38,6 @@ export default function AuthForm() {
     });
   };
 
-  // Focus management for OTP inputs
   const handleOtpInput = (e, index) => {
     const value = e.target.value;
     if (!/^\d?$/.test(value)) {
@@ -44,40 +49,72 @@ export default function AuthForm() {
     }
   };
 
-  const sendOtp = (e) => {
+  const sendOtp = async (e) => {
     e.preventDefault();
-    if (tab === 1 && !name.trim()) {
-      alert("Please enter your name.");
-      return;
-    }
+
     if (!mobile.match(/^\d{10}$/)) {
-      alert("Please enter a valid 10-digit mobile number.");
+      toast.error("Please enter a valid 10-digit mobile number.");
       return;
     }
 
-    // TODO: Call backend API to send OTP
-    setOtpSent(true);
-    clearOtpInputs();
+    if (tab === 1 && !name.trim()) {
+      toast.error("Name is required for registration.");
+      return;
+    }
+
+    try {
+      const payload = {
+        mobile,
+        ...(tab === 1 ? { name } : {}),
+      };
+
+      const response = await axios.post(`${API_BASE}/register`, payload);
+      toast.success("OTP sent successfully!");
+      setOtpSent(true);
+      clearOtpInputs();
+    } catch (error) {
+      console.error(error);
+      toast.error(
+        error?.response?.data?.message || "Failed to send OTP. Try again."
+      );
+    }
   };
 
-  const verifyOtp = (e) => {
+  const verifyOtp = async (e) => {
     e.preventDefault();
     const otp = otpInputsRef.current.map((input) => input.value).join("");
-    if (otp.length < 4) {
-      alert("Please enter the 4-digit OTP.");
+
+    if (otp.length !== 4) {
+      toast.error("Please enter the 4-digit OTP.");
       return;
     }
-    // TODO: Verify OTP with backend
 
-    alert(`${tab === 0 ? "Login" : "Register"} successful!`);
-    setOtpSent(false);
-    setMobile("");
-    setName("");
-    clearOtpInputs();
+    try {
+      const payload = { mobile, otp };
+      const response = await axios.post(`${API_BASE}/verify`, payload);
+
+      const token = response?.data?.token;
+      toast.success(`${tab === 0 ? "Login" : "Registration"} successful!`);
+
+      // Optional: Save token to localStorage
+      localStorage.setItem("token", token);
+
+      // Reset
+      setOtpSent(false);
+      setMobile("");
+      setName("");
+      clearOtpInputs();
+    } catch (error) {
+      console.error(error);
+      toast.error(
+        error?.response?.data?.message || "Invalid OTP. Please try again."
+      );
+    }
   };
 
   return (
     <div className="auth-container">
+      <ToastContainer position="top-center" autoClose={3000} />
       <Paper elevation={3} className="auth-paper" sx={{ borderRadius: "16px" }}>
         <Box textAlign="center" mb={2}>
           <FarmIcon fontSize="large" color="success" />
@@ -196,15 +233,7 @@ export default function AuthForm() {
             </button>
             <p className="resendNote">
               Didn't receive the code?{" "}
-              <button
-                type="button"
-                className="resendBtn"
-                onClick={() => {
-                  // TODO: resend OTP API call
-                  alert("OTP resent!");
-                  clearOtpInputs();
-                }}
-              >
+              <button type="button" className="resendBtn" onClick={sendOtp}>
                 Resend Code
               </button>
             </p>
