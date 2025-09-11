@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import axios from "axios";
 import {
   TextField,
   Button,
@@ -7,13 +8,18 @@ import {
   Paper,
   Tabs,
   Tab,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import FarmIcon from "@mui/icons-material/Grass";
-import "../styles/AuthForm.css";
-import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../styles/AuthForm.css";
+
+// Import your local JSON file here
+import locationData from "../India-State-District.json";
 
 export default function AuthForm() {
   const [tab, setTab] = useState(0); // 0 = Login, 1 = Register
@@ -22,13 +28,111 @@ export default function AuthForm() {
   const [name, setName] = useState("");
   const otpInputsRef = useRef([]);
 
+  // Location dropdowns
+  const [statesList, setStatesList] = useState([]);
+  const [districtsList, setDistrictsList] = useState([]);
+  const [villagesList, setVillagesList] = useState([]);
+
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [selectedVillage, setSelectedVillage] = useState("");
+
   const API_BASE = "https://farmer-backend-dqit.onrender.com/api/auth";
+
+  useEffect(() => {
+    // Extract all states by their name, sorted
+    const uniqueStates = locationData.map((item) => item.name).sort();
+    setStatesList(uniqueStates);
+  }, []);
+
+  const handleStateChange = (event) => {
+    const stateName = event.target.value;
+    setSelectedState(stateName);
+    setSelectedDistrict("");
+    setSelectedVillage("");
+
+    if (stateName) {
+      // Find the state object by name
+      const stateObj = locationData.find((item) => item.name === stateName);
+      // Set districts list from that state
+      setDistrictsList(stateObj ? stateObj.districts.sort() : []);
+    } else {
+      setDistrictsList([]);
+    }
+  };
+
+  // ... other imports and code remain unchanged
+
+  const handleDistrictChange = (event) => {
+    setSelectedDistrict(event.target.value);
+    setSelectedVillage("");
+  };
+
+  // Inside your form, replace Village select with TextField:
+  {
+    /* State select */
+  }
+  <FormControl fullWidth margin="normal" required>
+    <InputLabel id="state-select-label">State</InputLabel>
+    <Select
+      labelId="state-select-label"
+      value={selectedState}
+      label="State"
+      onChange={handleStateChange}
+    >
+      {statesList.map((state) => (
+        <MenuItem key={state} value={state}>
+          {state}
+        </MenuItem>
+      ))}
+    </Select>
+  </FormControl>;
+
+  {
+    /* District select */
+  }
+  <FormControl fullWidth margin="normal" required disabled={!selectedState}>
+    <InputLabel id="district-select-label">District</InputLabel>
+    <Select
+      labelId="district-select-label"
+      value={selectedDistrict}
+      label="District"
+      onChange={handleDistrictChange}
+    >
+      {districtsList.map((district) => (
+        <MenuItem key={district} value={district}>
+          {district}
+        </MenuItem>
+      ))}
+    </Select>
+  </FormControl>;
+
+  <TextField
+    label="Village"
+    variant="outlined"
+    fullWidth
+    margin="normal"
+    value={selectedVillage}
+    onChange={(e) => setSelectedVillage(e.target.value)}
+    required
+    disabled={!selectedDistrict}
+    sx={{
+      "& .MuiOutlinedInput-root": {
+        borderRadius: "12px",
+      },
+    }}
+  />;
 
   const handleTabChange = (event, newValue) => {
     setTab(newValue);
     setOtpSent(false);
     setMobile("");
     setName("");
+    setSelectedState("");
+    setSelectedDistrict("");
+    setSelectedVillage("");
+    setDistrictsList([]);
+    setVillagesList([]);
     clearOtpInputs();
   };
 
@@ -57,15 +161,28 @@ export default function AuthForm() {
       return;
     }
 
-    if (tab === 1 && !name.trim()) {
-      toast.error("Name is required for registration.");
-      return;
+    if (tab === 1) {
+      if (!name.trim()) {
+        toast.error("Name is required for registration.");
+        return;
+      }
+      if (!selectedState || !selectedDistrict || !selectedVillage) {
+        toast.error("Please select State, District & Village.");
+        return;
+      }
     }
 
     try {
       const payload = {
         mobile,
-        ...(tab === 1 ? { name } : {}),
+        ...(tab === 1
+          ? {
+              name,
+              state: selectedState,
+              district: selectedDistrict,
+              village: selectedVillage,
+            }
+          : {}),
       };
 
       const response = await axios.post(`${API_BASE}/register`, payload);
@@ -95,14 +212,17 @@ export default function AuthForm() {
 
       const token = response?.data?.token;
       toast.success(`${tab === 0 ? "Login" : "Registration"} successful!`);
-
-      // Optional: Save token to localStorage
       localStorage.setItem("token", token);
 
-      // Reset
+      // Reset all
       setOtpSent(false);
       setMobile("");
       setName("");
+      setSelectedState("");
+      setSelectedDistrict("");
+      setSelectedVillage("");
+      setDistrictsList([]);
+      setVillagesList([]);
       clearOtpInputs();
     } catch (error) {
       console.error(error);
@@ -130,47 +250,82 @@ export default function AuthForm() {
           textColor="success"
           centered
         >
-          <Tab
-            label="Login"
-            sx={{
-              fontWeight: tab === 0 ? "bold" : "normal",
-              color: tab === 0 ? "green" : "inherit",
-              backgroundColor:
-                tab === 0 ? "rgba(76, 175, 80, 0.1)" : "transparent",
-              borderRadius: "16px",
-              transition: "all 0.3s ease",
-            }}
-          />
-          <Tab
-            label="Register"
-            sx={{
-              fontWeight: tab === 1 ? "bold" : "normal",
-              color: tab === 1 ? "green" : "inherit",
-              backgroundColor:
-                tab === 1 ? "rgba(76, 175, 80, 0.1)" : "transparent",
-              borderRadius: "16px",
-              transition: "all 0.3s ease",
-            }}
-          />
+          <Tab label="Login" />
+          <Tab label="Register" />
         </Tabs>
 
         {!otpSent ? (
-          <form className="form-container" onSubmit={sendOtp}>
+          <form
+            className="form-container"
+            onSubmit={(e) => {
+              /* your sendOtp logic */
+            }}
+          >
             {tab === 1 && (
-              <TextField
-                label="Full Name"
-                variant="outlined"
-                fullWidth
-                margin="normal"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "12px",
-                  },
-                }}
-              />
+              <>
+                <TextField
+                  label="Full Name"
+                  variant="outlined"
+                  fullWidth
+                  margin="normal"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  sx={{ "& .MuiOutlinedInput-root": { borderRadius: "12px" } }}
+                />
+
+                {/* State Select */}
+                <FormControl fullWidth margin="normal" required>
+                  <InputLabel id="state-select-label">State</InputLabel>
+                  <Select
+                    labelId="state-select-label"
+                    value={selectedState}
+                    label="State"
+                    onChange={handleStateChange}
+                  >
+                    {statesList.map((state) => (
+                      <MenuItem key={state} value={state}>
+                        {state}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                {/* District Select */}
+                <FormControl
+                  fullWidth
+                  margin="normal"
+                  required
+                  disabled={!selectedState}
+                >
+                  <InputLabel id="district-select-label">District</InputLabel>
+                  <Select
+                    labelId="district-select-label"
+                    value={selectedDistrict}
+                    label="District"
+                    onChange={handleDistrictChange}
+                  >
+                    {districtsList.map((district) => (
+                      <MenuItem key={district} value={district}>
+                        {district}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                {/* Village manual input */}
+                <TextField
+                  label="Village"
+                  variant="outlined"
+                  fullWidth
+                  margin="normal"
+                  value={selectedVillage}
+                  onChange={(e) => setSelectedVillage(e.target.value)}
+                  required
+                  disabled={!selectedDistrict}
+                  sx={{ "& .MuiOutlinedInput-root": { borderRadius: "12px" } }}
+                />
+              </>
             )}
 
             <TextField
@@ -182,11 +337,7 @@ export default function AuthForm() {
               onChange={(e) => setMobile(e.target.value.replace(/\D/, ""))}
               inputProps={{ maxLength: 10 }}
               required
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "12px",
-                },
-              }}
+              sx={{ "& .MuiOutlinedInput-root": { borderRadius: "12px" } }}
             />
 
             <Button
@@ -200,44 +351,8 @@ export default function AuthForm() {
             </Button>
           </form>
         ) : (
-          <form className="otp-Form" onSubmit={verifyOtp}>
-            <span className="mainHeading">Enter OTP</span>
-            <p className="otpSubheading">
-              We have sent a verification code to your mobile number
-            </p>
-            <div className="inputContainer">
-              {[0, 1, 2, 3].map((index) => (
-                <input
-                  key={index}
-                  maxLength={1}
-                  type="text"
-                  className="otp-input"
-                  ref={(el) => (otpInputsRef.current[index] = el)}
-                  onChange={(e) => handleOtpInput(e, index)}
-                  required
-                />
-              ))}
-            </div>
-            <button className="verifyButton" type="submit">
-              Verify
-            </button>
-            <button
-              type="button"
-              className="exitBtn"
-              onClick={() => {
-                setOtpSent(false);
-                clearOtpInputs();
-              }}
-            >
-              ×
-            </button>
-            <p className="resendNote">
-              Didn't receive the code?{" "}
-              <button type="button" className="resendBtn" onClick={sendOtp}>
-                Resend Code
-              </button>
-            </p>
-          </form>
+          /* OTP form code */
+          <></>
         )}
       </Paper>
     </div>
