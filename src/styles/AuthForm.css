@@ -8,7 +8,7 @@
       rgba(168, 218, 220, 0.8),
       rgba(69, 123, 157, 0.8)
     ),
-    url("https://images.stockcake.com/public/1/d/e/1de02852-178d-4552-a7d1-e3db627b5235_large/farmer-at-sunset-stockcake.jpg"); /* Update with your image path */
+    url("../auth-bg.jpg"); /* Update with your image path */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
