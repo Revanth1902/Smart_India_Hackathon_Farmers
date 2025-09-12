@@ -1,11 +1,17 @@
 import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
 import AuthWithOTP from "./components/AuthForm";
+import Home from "./components/Homepage";
 
 function App() {
   return (
-    <div>
-      <AuthWithOTP />
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<AuthWithOTP />} />
+        <Route path="/home" element={<Home />} />
+      </Routes>
+    </Router>
   );
 }
 
