@@ -50,7 +50,7 @@ function Dashboard() {
               alignItems: "center",
             }}
           >
-            <Box sx={{ width: 320, height: 250 }}>
+            <Box sx={{ width: 320, height: 180 }}>
               <CardComponent title={title} icon={icon} color={color} to={to} />
             </Box>
           </Grid>
