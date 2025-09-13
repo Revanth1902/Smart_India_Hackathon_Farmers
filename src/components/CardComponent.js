@@ -62,70 +62,62 @@ const MapPreview = ({ location }) => {
   );
 };
 
-export const WelcomeCard = ({ name }) => (
-  <Card className="info-card welcome-card">
-    <CardContent>
-      <Typography variant="h6">Welcome, Farmer {name}!</Typography>
-    </CardContent>
-  </Card>
-);
+export const WelcomeCard = ({ name }) => {
+  return (
+    <div className="dashboard-welcome-card">
+      <div className="dashboard-welcome-img"></div>
+
+      <div className="dashboard-welcome-textbox">
+        <div className="dashboard-welcome-textcontent">
+          <p className="dashboard-welcome-title">Welcome, Farmer {name}!</p>
+        </div>
+        <p className="dashboard-welcome-subtext">
+          Hope your farm is thriving today! 🌱
+        </p>
+      </div>
+    </div>
+  );
+};
 
 // FarmInfoCard Component
-export const FarmInfoCard = ({ location, temp, rainfall }) => {
+export const FarmInfoCard = ({ location }) => {
   const mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(
     location
   )}&output=embed`;
 
   return (
-    <Card className="info-card farm-info-card" style={{ position: "relative" }}>
-      <CardContent>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-          <LocationOnIcon />
-          <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-            My Farm: {location}
-          </Typography>
-        </Box>
+    <div className="farm-card">
+      {/* Map section */}
+      <div className="farm-card-map">
+        <iframe
+          title="Google Maps Preview"
+          width="100%"
+          height="100%"
+          frameBorder="0"
+          src={mapUrl}
+          allowFullScreen
+        ></iframe>
+      </div>
 
-        {/* Embedded Map */}
-        <Box
-          sx={{
-            height: 150,
-            borderRadius: 8,
-            overflow: "hidden",
-            mb: 1,
-            boxShadow: 1,
-          }}
-        >
-          <iframe
-            title="Google Maps Preview"
-            width="100%"
-            height="100%"
-            frameBorder="0"
-            style={{ border: 0 }}
-            src={mapUrl}
-            allowFullScreen
-          ></iframe>
-        </Box>
+      {/* Content section */}
+      <div className="farm-card-content">
+        <h3 className="farm-card-title">My Farm: {location}</h3>
+      </div>
 
-        {/* External Google Maps Link */}
+      {/* Button section */}
+      <div className="farm-card-footer">
         <a
           href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
             location
           )}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="btn maps-btn"
-          style={{
-            textDecoration: "none",
-            fontSize: "0.875rem",
-            color: "#1976d2",
-            fontWeight: "500",
-          }}
+          className="farm-card-button"
         >
-          🗺️ Open in Google Maps
+          🗺️ View on Maps
         </a>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

@@ -69,12 +69,12 @@ export default function Navbar() {
           </Typography>
         </Box>
 
-        {/* Weather + Date */}
+        {/*         
         <Box display="flex" alignItems="center">
           {weather ? (
             <Fade in={true} timeout={1000}>
               <Box display="flex" flexDirection="column" alignItems="flex-end">
-                {/* Weather Info (Top) */}
+             =
                 <Box display="flex" alignItems="center" gap={1}>
                   <WbSunnyIcon sx={{ color: "#ffeb3b" }} />
                   <Typography sx={{ color: "#fff" }}>
@@ -82,7 +82,7 @@ export default function Navbar() {
                   </Typography>
                 </Box>
 
-                {/* Date (Bottom) */}
+                
                 <Typography
                   variant="body2"
                   sx={{ color: "#fff", fontStyle: "italic", mt: 0.5 }}
@@ -94,7 +94,7 @@ export default function Navbar() {
           ) : (
             <CircularProgress size={22} sx={{ color: "#fff" }} />
           )}
-        </Box>
+        </Box>  */}
       </Toolbar>
     </StyledAppBar>
   );
