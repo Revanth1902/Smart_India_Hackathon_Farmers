@@ -41,7 +41,7 @@ function FooterNav() {
     setValue(newValue);
     switch (newValue) {
       case 0:
-        navigate("/");
+        navigate("/landing");
         break;
       case 1:
         navigate("/crop-advisory");
