@@ -19,7 +19,7 @@ function FooterNav() {
   // Set the active navigation item based on the current path
   useEffect(() => {
     switch (location.pathname) {
-      case "/":
+      case "/landing":
         setValue(0);
         break;
       case "/crop-advisory": // Assuming Advisory maps to Crop Advisory for example
