@@ -165,10 +165,21 @@ export default function AuthForm() {
       const payload = { mobile, otp };
       const response = await axios.post(`${API_BASE}/verify`, payload);
 
-      const token = response?.data?.token;
+      const { token, user } = response.data;
+
       toast.success(`${tab === 0 ? "Login" : "Registration"} successful!`);
 
-      Cookies.set("authToken", token, { expires: 7 });
+      // ✅ Set cookie for 30 days
+      Cookies.set("authToken", token, { expires: 30 }); // 30 days expiry
+      Cookies.set("user", JSON.stringify(user), { expires: 30 });
+
+      // ✅ Set localStorage (with optional timestamp for manual expiry tracking)
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + 30);
+
+      localStorage.setItem("authToken", token);
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("expiry", expiryDate.toISOString());
 
       navigate("/landing");
 

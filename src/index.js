@@ -5,6 +5,11 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import "./styles/home.css";
 
+<link
+  href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600&display=swap"
+  rel="stylesheet"
+/>;
+
 /* Farmer theme: greens, earth tones */
 const theme = createTheme({
   palette: {
@@ -13,7 +18,10 @@ const theme = createTheme({
     secondary: { main: "#b76e09" }, // earth/orange
     background: { default: "#f6fbf7" },
   },
-  typography: { fontFamily: '"Inter", "Roboto", sans-serif' },
+
+  typography: {
+    fontFamily: '"Exo 2", "Roboto", "Helvetica", "Arial", sans-serif',
+  },
 });
 
 const root = ReactDOM.createRoot(document.getElementById("root"));

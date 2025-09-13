@@ -1,63 +1,141 @@
-import React from "react";
-import Grid from "@mui/material/Grid";
+import React, { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
-import CardComponent from "./CardComponent";
+import Header from "../components/Navbar";
+import {
+  WelcomeCard,
+  FarmInfoCard,
+  WeatherAlertCard,
+} from "../components/CardComponent";
+import QuickActions from "../components/QuickActions";
+import RecentActivity from "../components/Recnets";
+import "../styles/Dashboard.css";
 
-import SproutIcon from "@mui/icons-material/LocalFlorist";
-import FertilizerIcon from "@mui/icons-material/Gavel";
-import DiseaseIcon from "@mui/icons-material/Search";
-import WeatherIcon from "@mui/icons-material/CloudQueue";
+const Dashboard = () => {
+  // States for user, location and weather data
+  const [farmerData, setFarmerData] = useState({
+    name: "Farmer",
+    farmLocation: null,
+  });
 
-function Dashboard() {
+  const [coords, setCoords] = useState(null);
+  const [weather, setWeather] = useState(null);
+  const [locationError, setLocationError] = useState(null);
+
+  // Load user data from localStorage on mount
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (storedUser) {
+      setFarmerData({
+        name: storedUser.name || "Farmer",
+        farmLocation: storedUser.farmLocation || null,
+      });
+    }
+  }, []);
+
+  // Get user's current position
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setLocationError("Geolocation is not supported by your browser.");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setCoords({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+        setLocationError(null);
+      },
+      () => {
+        setLocationError(
+          "Location access denied. Enable location to get weather updates."
+        );
+      }
+    );
+  }, []);
+
+  // Fetch weather data when coords change
+  useEffect(() => {
+    if (!coords) return;
+
+    const fetchWeather = async () => {
+      try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude}&longitude=${coords.longitude}&current_weather=true`;
+        const res = await fetch(url);
+        const data = await res.json();
+        setWeather(data.current_weather);
+      } catch (error) {
+        setWeather(null);
+      }
+    };
+
+    fetchWeather();
+  }, [coords]);
+
   return (
-    <Box sx={{ flexGrow: 1, p: 2 }}>
-      <Grid container spacing={3} justifyContent="center">
-        {[
-          {
-            title: "CROP ADVISORY",
-            icon: SproutIcon,
-            color: "#E8F5E9",
-            to: "/crop-advisory",
-          },
-          {
-            title: "FERTILIZER RECOMMENDATION",
-            icon: FertilizerIcon,
-            color: "#E3F2FD",
-            to: "/fertilizer-recommendation",
-          },
-          {
-            title: "DISEASE DETECTION",
-            icon: DiseaseIcon,
-            color: "#FFEBEE",
-            to: "/disease-detection",
-          },
-          {
-            title: "WEATHER & PEST ALERTS",
-            icon: WeatherIcon,
-            color: "#E1F5FE",
-            to: "/weather-pest-alerts",
-          },
-        ].map(({ title, icon, color, to }) => (
-          <Grid
-            key={title}
-            item
-            xs={12}
-            sm={6}
-            md={6}
+    <Box className="dashboard-container">
+      <main className="dashboard-main">
+        <WelcomeCard name={farmerData.name} />
+
+        {/* Farm Location Card */}
+        {farmerData.farmLocation ? (
+          <FarmInfoCard
+            location={farmerData.farmLocation}
+            temp={weather ? `${weather.temperature}°C` : "Loading..."}
+            rainfall="N/A"
+          />
+        ) : (
+          <Box
             sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
+              p: 2,
+              mb: 2,
+              border: "1px solid #ccc",
+              borderRadius: 2,
+              color: "gray",
+              textAlign: "center",
             }}
           >
-            <Box sx={{ width: 320, height: 180 }}>
-              <CardComponent title={title} icon={icon} color={color} to={to} />
-            </Box>
-          </Grid>
-        ))}
-      </Grid>
+            No farm location saved. Please update your profile.
+          </Box>
+        )}
+
+        {/* Weather Alert Card */}
+        {locationError ? (
+          <Box
+            sx={{
+              p: 2,
+              mb: 2,
+              border: "1px solid #ccc",
+              borderRadius: 2,
+              color: "orange",
+              textAlign: "center",
+            }}
+          >
+            {locationError}
+          </Box>
+        ) : weather ? (
+          <WeatherAlertCard
+            temp={`${weather.temperature}°C`}
+            alert={weather.weathercode === 3 ? "Cloudy" : "Clear sky"} // Simplified alert
+            probability="N/A"
+          />
+        ) : (
+          <Box
+            sx={{
+              p: 2,
+              mb: 2,
+              textAlign: "center",
+            }}
+          >
+            Loading weather info...
+          </Box>
+        )}
+
+        <QuickActions />
+        <RecentActivity />
+      </main>
     </Box>
   );
-}
+};
 
 export default Dashboard;
