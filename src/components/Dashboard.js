@@ -11,7 +11,7 @@ import WeatherIcon from "@mui/icons-material/CloudQueue";
 function Dashboard() {
   return (
     <Box sx={{ flexGrow: 1, p: 2 }}>
-      <Grid container spacing={3}>
+      <Grid container spacing={3} justifyContent="center">
         {[
           {
             title: "CROP ADVISORY",
@@ -43,14 +43,14 @@ function Dashboard() {
             item
             xs={12}
             sm={6}
+            md={6}
             sx={{
               display: "flex",
-              alignItems: "center",
               justifyContent: "center",
-              minHeight: 200, // Minimum height for consistent sizing
+              alignItems: "center",
             }}
           >
-            <Box sx={{ width: "100%", maxWidth: 400 }}>
+            <Box sx={{ width: 320, height: 250 }}>
               <CardComponent title={title} icon={icon} color={color} to={to} />
             </Box>
           </Grid>

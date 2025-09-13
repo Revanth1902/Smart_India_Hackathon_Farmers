@@ -12,7 +12,8 @@ function CardComponent({ title, icon: Icon, color, to }) {
   return (
     <Card
       sx={{
-        height: "100%", // Fill parent's height
+        width: "100%",
+        height: "100%",
         backgroundColor: color,
         display: "flex",
         flexDirection: "column",
@@ -25,7 +26,7 @@ function CardComponent({ title, icon: Icon, color, to }) {
     >
       <CardActionArea
         sx={{
-          height: "100%", // Fill card height
+          height: "100%",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
