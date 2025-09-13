@@ -1,5 +1,5 @@
 .auth-container {
-  min-height: 100vh;
+  min-height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -8,11 +8,11 @@
       rgba(168, 218, 220, 0.8),
       rgba(69, 123, 157, 0.8)
     ),
-    url("../auth-bg.jpg"); /* Update with your image path */
+    url("../auth-bg.jpg") !important;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  padding: 20px;
+  padding: 10px;
 }
 
 .auth-paper {

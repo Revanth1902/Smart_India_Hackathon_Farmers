@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AuthWithOTP from "./components/AuthForm";
 import Home from "./components/Homepage";
 import ProtectedRoute from "./ProtectedRoute";
+import LandindgPage from "./components/LandingPage";
 
 function App() {
   return (
@@ -15,6 +16,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Home />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/landing"
+          element={
+            <ProtectedRoute>
+              <LandindgPage />
             </ProtectedRoute>
           }
         />

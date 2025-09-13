@@ -155,7 +155,7 @@ export default function AuthForm() {
 
       Cookies.set("authToken", token, { expires: 7 });
 
-      navigate("/home");
+      navigate("/landing");
 
       // Reset
       setOtpSent(false);
@@ -185,7 +185,7 @@ export default function AuthForm() {
         <Box textAlign="center" mb={2}>
           <FarmIcon fontSize="large" color="success" />
           <Typography variant="h4" component="h1">
-            Farmer Portal
+            Krishi Sakhi
           </Typography>
         </Box>
 

@@ -30,7 +30,7 @@ export default function Navbar() {
         <Box display="flex" alignItems="center" gap={1}>
           <AgricultureIcon />
           <Typography variant="h6" className="navbar-user">
-            किसान साथी (Farmer's Companion)
+            Krishi Sakhi
           </Typography>
         </Box>
 
