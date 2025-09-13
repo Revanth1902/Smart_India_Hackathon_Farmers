@@ -1,41 +1,51 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import Card from "@mui/material/Card";
 import CardActionArea from "@mui/material/CardActionArea";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
-import { SvgIcon } from "@mui/material"; // For custom icons
-import { Link } from "react-router-dom";
+import Box from "@mui/material/Box";
 
 function CardComponent({ title, icon: Icon, color, to }) {
+  const navigate = useNavigate();
+
   return (
     <Card
       sx={{
-        height: "100%",
+        height: "100%", // Make card full height of grid item
+        backgroundColor: color,
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
-        alignItems: "center",
-        textAlign: "center",
-        backgroundColor: color,
-        color: "white", // Text color on the card
-        p: 2,
+        borderRadius: 2,
+        boxShadow: 3,
       }}
+      onClick={() => navigate(to)}
     >
       <CardActionArea
-        component={Link}
-        to={to}
         sx={{
-          flexGrow: 1,
+          height: "100%",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
+          p: 3,
         }}
       >
-        <SvgIcon sx={{ fontSize: 60, mb: 1 }}>
-          <Icon />
-        </SvgIcon>
-        <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+        <Box sx={{ mb: 2, color: "primary.main" }}>
+          <Icon sx={{ fontSize: 60 }} />
+        </Box>
+        <Typography
+          variant="h6"
+          component="h2"
+          align="center"
+          sx={{
+            fontWeight: "bold",
+            whiteSpace: "normal",
+            wordBreak: "break-word",
+            lineHeight: 1.2,
+          }}
+        >
           {title}
         </Typography>
       </CardActionArea>
