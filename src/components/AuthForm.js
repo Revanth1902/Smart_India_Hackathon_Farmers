@@ -38,6 +38,8 @@ export default function AuthForm() {
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedVillage, setSelectedVillage] = useState("");
 
+  const [testOtp, setTestOtp] = useState(""); // <-- New state to store OTP for testing
+
   const API_BASE = "https://farmer-backend-dqit.onrender.com/api/auth";
 
   useEffect(() => {
@@ -70,6 +72,7 @@ export default function AuthForm() {
     setSelectedVillage("");
     setDistrictsList([]);
     clearOtpInputs();
+    setTestOtp(""); // Reset OTP when switching tabs
   };
 
   const clearOtpInputs = () => {
@@ -129,6 +132,18 @@ export default function AuthForm() {
       toast.success("OTP sent successfully!");
       setOtpSent(true);
       clearOtpInputs();
+
+      // If backend sends OTP (in test mode), save it and autofill inputs
+      if (response.data.otp) {
+        setTestOtp(response.data.otp);
+
+        // Autofill OTP inputs with test OTP
+        otpInputsRef.current.forEach((input, idx) => {
+          if (input) input.value = response.data.otp[idx] || "";
+        });
+      } else {
+        setTestOtp("");
+      }
     } catch (error) {
       console.error(error);
       toast.error(
@@ -142,7 +157,7 @@ export default function AuthForm() {
     const otp = otpInputsRef.current.map((input) => input.value).join("");
 
     if (otp.length !== 6) {
-      toast.error("Please enter the 4-digit OTP.");
+      toast.error("Please enter the 6-digit OTP.");
       return;
     }
 
@@ -166,6 +181,7 @@ export default function AuthForm() {
       setSelectedVillage("");
       setDistrictsList([]);
       clearOtpInputs();
+      setTestOtp("");
     } catch (error) {
       console.error(error);
       toast.error(
@@ -330,6 +346,19 @@ export default function AuthForm() {
                 />
               ))}
             </Box>
+
+            {/* Display the OTP in test mode */}
+            {testOtp && (
+              <Typography
+                variant="body2"
+                align="center"
+                color="textSecondary"
+                sx={{ mt: 2, fontWeight: "bold" }}
+              >
+                🔑 Test OTP: {testOtp}
+              </Typography>
+            )}
+
             <Button
               type="submit"
               variant="contained"
@@ -346,6 +375,7 @@ export default function AuthForm() {
               onClick={() => {
                 setOtpSent(false);
                 clearOtpInputs();
+                setTestOtp(""); // Reset OTP when going back
               }}
             >
               Go Back
