@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AuthWithOTP from "./components/AuthForm";
 import Home from "./components/Homepage";
 import ProtectedRoute from "./ProtectedRoute";
-import LandindgPage from "./components/LandingPage";
+import LandindgPage from "./components/Dashboard";
 
 function App() {
   return (
