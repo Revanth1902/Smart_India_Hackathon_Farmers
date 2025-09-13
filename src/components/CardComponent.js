@@ -12,7 +12,7 @@ function CardComponent({ title, icon: Icon, color, to }) {
   return (
     <Card
       sx={{
-        height: "100%", // Make card full height of grid item
+        height: "100%", // Fill parent's height
         backgroundColor: color,
         display: "flex",
         flexDirection: "column",
@@ -21,10 +21,11 @@ function CardComponent({ title, icon: Icon, color, to }) {
         boxShadow: 3,
       }}
       onClick={() => navigate(to)}
+      elevation={4}
     >
       <CardActionArea
         sx={{
-          height: "100%",
+          height: "100%", // Fill card height
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
