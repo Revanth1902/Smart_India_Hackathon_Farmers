@@ -111,8 +111,8 @@ const App = () => {
                       <Route path="schemes" element={<Schemes />} />
                     </Routes>
                   </Box>
-                  <VoiceAssistantButton />
-                  <SummaryBar />
+                  {/* <VoiceAssistantButton />
+                  <SummaryBar /> */}
                   <FooterNav />
                 </Box>
               </ProtectedRoute>
