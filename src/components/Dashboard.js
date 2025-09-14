@@ -1,158 +1,158 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Box from "@mui/material/Box";
 import {
-  WelcomeCard,
-  FarmInfoCard,
-  WeatherAlertCard,
-} from "../components/CardComponent";
-import QuickActions from "../components/QuickActions";
-import RecentActivity from "../components/Recnets";
-import useLanguage from "../hooks/useLanguage";
-import { translations } from "../utils/translations";
+  Settings,
+  LocationOn,
+  WbSunny,
+  Opacity,
+  Thunderstorm,
+  Warning,
+  CameraAlt,
+  Spa,
+  Chat,
+  Cloud,
+  ShowChart,
+  Description,
+  AccountCircle,
+} from "@mui/icons-material";
+import "../styles/Dashboard.css";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
-  const language = useLanguage();
+  const navigate = useNavigate();
 
-  const [farmerData, setFarmerData] = useState({
-    name: "Farmer",
-    farmLocation: null,
-  });
-  const [formattedDate, setFormattedDate] = useState("");
-  const [coords, setCoords] = useState(null);
-  const [weather, setWeather] = useState(null);
-  const [locationError, setLocationError] = useState(null);
+  const farmerData = {
+    name: "Farmer Anish",
+    farmLocation: "Kerala",
+  };
 
-  useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (storedUser) {
-      const { name, village, district, state } = storedUser;
-      const locationParts = [village, district, state].filter(Boolean);
-      const farmLocation = locationParts.join(", ");
-      setFarmerData({
-        name: name || "Farmer",
-        farmLocation: farmLocation || null,
-      });
-    }
-  }, []);
+  const weather = {
+    temp: "29°C",
+    rainfall: "5mm",
+    humidity: "85%",
+    alert: "Heavy rain expected",
+  };
 
-  useEffect(() => {
-    if (!navigator.geolocation) {
-      setLocationError(translations.locationDenied[language]);
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setCoords({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        });
-        setLocationError(null);
-      },
-      () => {
-        setLocationError(translations.locationDenied[language]);
-      }
-    );
-  }, [language]);
-
-  useEffect(() => {
-    if (!coords) return;
-
-    const fetchWeather = async () => {
-      try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude}&longitude=${coords.longitude}&current_weather=true`;
-        const res = await fetch(url);
-        const data = await res.json();
-        setWeather(data.current_weather);
-        const date = new Date(data.current_weather.time);
-        const formatter = new Intl.DateTimeFormat("en-IN", {
-          weekday: "long",
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        });
-        setFormattedDate(formatter.format(date));
-      } catch (error) {
-        setWeather(null);
-      }
-    };
-
-    fetchWeather();
-  }, [coords]);
+  const date = "9/14/2025";
 
   return (
     <Box className="dashboard-container">
-      <main className="dashboard-main">
-        <Box
-          sx={{
-            display: "grid",
-            gap: 2,
-            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-            mb: 2,
-          }}
-        >
-          <WelcomeCard
-            name={farmerData.name}
-            text={translations.welcome[language]}
-            subText={translations.thriving[language]}
-          />
+      {/* Header */}
+      <header className="dashboard-header">
+        <div>
+          <h1 className="app-title">KRISHI SAKHI</h1>
+          <span className="app-subtitle">Farming Assistant Dashboard</span>
+        </div>
+        <button className="settings-btn">
+          <Settings />
+        </button>
+      </header>
 
-          {farmerData.farmLocation ? (
-            <FarmInfoCard location={farmerData.farmLocation} />
-          ) : (
-            <Box
-              sx={{
-                p: 2,
-                border: "1px solid #ccc",
-                borderRadius: 2,
-                color: "gray",
-                textAlign: "center",
-              }}
-            >
-              {translations.locationMissing[language]}
-            </Box>
-          )}
+      {/* Welcome Section */}
+      <section className="welcome-card">
+        <div>
+          <h2>
+            Welcome, <span>{farmerData.name}!</span>
+          </h2>
+          <p>
+            <LocationOn fontSize="small" /> My Farm: {farmerData.farmLocation}
+          </p>
+        </div>
+        <div className="date-box">Today’s Date {date}</div>
+      </section>
 
-          {locationError ? (
-            <Box
-              sx={{
-                p: 2,
-                border: "1px solid #ccc",
-                borderRadius: 2,
-                color: "orange",
-                textAlign: "center",
-              }}
-            >
-              {locationError}
-            </Box>
-          ) : weather ? (
-            <WeatherAlertCard
-              temp={`${weather.temperature}°C`}
-              alert={
-                weather.weathercode === 3
-                  ? translations.weatherAlert.cloudy[language]
-                  : translations.weatherAlert.clear[language]
-              }
-              date={formattedDate}
-              location={farmerData.farmLocation}
-            />
-          ) : (
-            <Box
-              sx={{
-                p: 2,
-                textAlign: "center",
-              }}
-            >
-              {translations.weatherLoading[language]}
-            </Box>
-          )}
+      {/* Weather Section */}
+      <section className="weather-card">
+        <div className="weather-header">
+          <h3>Weather Today</h3>
+          <span className="weather-sub">Current conditions</span>
+        </div>
+        <div className="weather-stats">
+          <span>
+            <WbSunny /> {weather.temp}
+          </span>
+          <span>
+            <Thunderstorm /> {weather.rainfall}
+          </span>
+          <span>
+            <Opacity /> {weather.humidity}
+          </span>
+        </div>
+        <div className="weather-alert">
+          <Warning /> {weather.alert}
+        </div>
+      </section>
 
-          <QuickActions language={language} />
-        </Box>
+      {/* Quick Actions */}
+      <section>
+        <h3 className="section-title">Quick Actions</h3>
+        <div className="quick-actions">
+          <div
+            className="action-card"
+            onClick={() => navigate("/dashboard/diagnose")}
+          >
+            <CameraAlt fontSize="large" />
+            <strong> Diagnose Plant Disease</strong>
+            <p>Get AI-powered crop advisory</p>
+          </div>
+          <div
+            className="action-card"
+            onClick={() => navigate("/dashboard/recommend")}
+          >
+            <Spa fontSize="large" />
+            <strong> Get Crop Recommendation</strong>
+            <p>Personalized fertilizer advice</p>
+          </div>
+          <div
+            className="action-card"
+            onClick={() => navigate("/dashboard/ask")}
+          >
+            <Chat fontSize="large" />
+            <strong> Ask Bot</strong>
+            <p>Chat with AI farming assistant</p>
+          </div>
+        </div>
+      </section>
 
-        <Box sx={{ mb: 2 }}>
-          <RecentActivity />
-        </Box>
-      </main>
+      {/* Recent Activity */}
+      <section className="recent-card">
+        <h3>Recent Activity</h3>
+        <p className="recent-sub">
+          Your latest farming queries and recommendations
+        </p>
+        <div className="recent-empty">
+          <Description style={{ fontSize: 40, color: "#bbb" }} />
+          <p>No recent activity</p>
+          <p>Start by asking for crop advisory</p>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="dashboard-footer">
+        <nav>
+          <button
+            className="footer-btn"
+            onClick={() => navigate("/dashboard/weather")}
+          >
+            <Cloud /> Weather
+          </button>
+          <button
+            className="footer-btn"
+            onClick={() => navigate("/dashboard/marketprice")}
+          >
+            <ShowChart /> Market Prices
+          </button>
+          <button
+            className="footer-btn"
+            onClick={() => navigate("/dashboard/schemes")}
+          >
+            <Description /> Schemes
+          </button>
+          <button className="footer-btn">
+            <AccountCircle /> Profile
+          </button>
+        </nav>
+      </footer>
     </Box>
   );
 };
