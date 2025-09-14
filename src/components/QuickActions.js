@@ -14,17 +14,17 @@ const QuickActions = ({ language }) => {
     {
       text: translations.actions.diagnose[language],
       icon: <CameraAltIcon fontSize="large" />,
-      to: "/diagnose",
+      to: "/dashboard/diagnose",
     },
     {
       text: translations.actions.recommend[language],
       icon: <GrassIcon fontSize="large" />,
-      to: "/recommend",
+      to: "/dashboard/recommend",
     },
     {
       text: translations.actions.ask[language],
       icon: <ForumIcon fontSize="large" />,
-      to: "/ask",
+      to: "/dashboard/ask",
     },
   ];
 

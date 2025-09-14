@@ -24,6 +24,7 @@ import FertilizerRecommendationPage from "./pages/FertilizerRecommendation";
 import DiseaseDetectionPage from "./pages/DiseaseDetection";
 import WeatherPestAlertsPage from "./pages/WeatherPestAlerts";
 import WelcomePage from "./components/WelcomePage";
+import Homepage from "./components/Homepage";
 
 const theme = createTheme({
   palette: {
@@ -96,6 +97,12 @@ const App = () => {
                         path="weather-pest-alerts"
                         element={<WeatherPestAlertsPage />}
                       />
+                      <Route
+                        path="diagnose"
+                        element={<DiseaseDetectionPage />}
+                      />
+                      <Route path="recommend" element={<CropAdvisoryPage />} />
+                      <Route path="ask" element={<Homepage />} />
                     </Routes>
                   </Box>
                   <VoiceAssistantButton />
