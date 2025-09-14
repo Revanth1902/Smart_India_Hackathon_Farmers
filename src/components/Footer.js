@@ -36,16 +36,16 @@ function FooterNav() {
 
   useEffect(() => {
     switch (location.pathname) {
-      case "/landing":
+      case "/dashboard/landing":
         setValue(0);
         break;
-      case "/crop-advisory":
+      case "/dashboard/crop-advisory":
         setValue(1);
         break;
-      case "/disease-detection":
+      case "/dashboard/disease-detection":
         setValue(2);
         break;
-      case "/weather-pest-alerts":
+      case "/dashboard/weather-pest-alerts":
         setValue(3);
         break;
       default:
@@ -58,16 +58,16 @@ function FooterNav() {
     setValue(newValue);
     switch (newValue) {
       case 0:
-        navigate("/landing");
+        navigate("/dashboard/landing");
         break;
       case 1:
-        navigate("/crop-advisory");
+        navigate("/dashboard/crop-advisory");
         break;
       case 2:
-        navigate("/disease-detection");
+        navigate("/dashboard/disease-detection");
         break;
       case 3:
-        navigate("/weather-pest-alerts");
+        navigate("/dashboard/weather-pest-alerts");
         break;
       default:
         navigate("/");
