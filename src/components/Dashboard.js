@@ -89,7 +89,7 @@ const Dashboard = () => {
         <div className="quick-actions">
           <div
             className="action-card"
-            onClick={() => navigate("/dashboard/cropadvisory")}
+            onClick={() => navigate("/dashboard/diagnose")}
           >
             <CameraAlt fontSize="large" />
             <strong> Diagnose Plant Disease</strong>
