@@ -29,25 +29,8 @@ const ChatPage = () => {
   };
 
   return (
-    <div className="chat-container">
-      {/* Header */}
-      <header className="chat-header">
-        <div className="logo">🌱 KRISHI SAKHI</div>
-        <div className="lang-dropdown">
-          <select>
-            <option>English</option>
-            <option>हिंदी</option>
-            <option>తెలుగు</option>
-          </select>
-        </div>
-      </header>
-
-      <p className="subtext">
-        Ask anything about farming, crops, weather, or government schemes
-      </p>
-
-      {/* Chat Box */}
-      <main className="chat-box">
+    <div className="chat-wrapper">
+      <div className="chat-box">
         {messages.map((msg, index) => (
           <div
             key={index}
@@ -58,10 +41,9 @@ const ChatPage = () => {
             ))}
           </div>
         ))}
-      </main>
+      </div>
 
-      {/* Input Area */}
-      <footer className="chat-input">
+      <div className="chat-input-bar">
         <input
           type="text"
           placeholder="Type your farming question..."
@@ -69,8 +51,6 @@ const ChatPage = () => {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
         />
-
-        {/* Attachment Icon with hidden file input */}
         <label className="icon attach">
           <AttachFile />
           <input
@@ -79,12 +59,11 @@ const ChatPage = () => {
             onChange={(e) => console.log("File selected:", e.target.files[0])}
           />
         </label>
-
         <Mic className="icon mic" />
         <button onClick={handleSend} className="send-btn">
           <Send />
         </button>
-      </footer>
+      </div>
     </div>
   );
 };
