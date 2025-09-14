@@ -1,6 +1,4 @@
-// This is a placeholder for your existing FooterNav component.
-// You would integrate your component's code here.
-import React from "react";
+import React, { useEffect, useState } from "react";
 import BottomNavigation from "@mui/material/BottomNavigation";
 import BottomNavigationAction from "@mui/material/BottomNavigationAction";
 import HomeIcon from "@mui/icons-material/Home";
@@ -9,30 +7,49 @@ import SearchIcon from "@mui/icons-material/Search";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import Box from "@mui/material/Box";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import useLanguage from "../hooks/useLanguage"; // Import your language hook
+
+const translations = {
+  home: {
+    english: "Home",
+    malayalam: "ഹോം",
+  },
+  advisory: {
+    english: "Advisory",
+    malayalam: "അഡ്വൈസറി",
+  },
+  detect: {
+    english: "Detect",
+    malayalam: "ഡിറ്റക്റ്റ്",
+  },
+  alerts: {
+    english: "Alerts",
+    malayalam: "അലർട്ട്സ്",
+  },
+};
 
 function FooterNav() {
+  const lang = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const [value, setValue] = useState(0);
 
-  // Set the active navigation item based on the current path
   useEffect(() => {
     switch (location.pathname) {
       case "/landing":
         setValue(0);
         break;
-      case "/crop-advisory": // Assuming Advisory maps to Crop Advisory for example
+      case "/crop-advisory":
         setValue(1);
         break;
-      case "/disease-detection": // Assuming Detect maps to Disease Detection
+      case "/disease-detection":
         setValue(2);
         break;
-      case "/weather-pest-alerts": // Assuming Alerts maps to Weather & Pest Alerts
+      case "/weather-pest-alerts":
         setValue(3);
         break;
       default:
-        setValue(0); // Default to home
+        setValue(0);
         break;
     }
   }, [location.pathname]);
@@ -67,15 +84,27 @@ function FooterNav() {
         left: 0,
         right: 0,
         zIndex: 1000,
-        boxShadow: "0 -2px 10px rgba(0,0,0,0.05)", // Subtle shadow
+        boxShadow: "0 -2px 10px rgba(0,0,0,0.05)",
         backgroundColor: "white",
       }}
     >
       <BottomNavigation value={value} onChange={handleChange} showLabels>
-        <BottomNavigationAction label="Home" icon={<HomeIcon />} />
-        <BottomNavigationAction label="Advisory" icon={<AssignmentIcon />} />
-        <BottomNavigationAction label="Detect" icon={<SearchIcon />} />
-        <BottomNavigationAction label="Alerts" icon={<NotificationsIcon />} />
+        <BottomNavigationAction
+          label={translations.home[lang]}
+          icon={<HomeIcon />}
+        />
+        <BottomNavigationAction
+          label={translations.advisory[lang]}
+          icon={<AssignmentIcon />}
+        />
+        <BottomNavigationAction
+          label={translations.detect[lang]}
+          icon={<SearchIcon />}
+        />
+        <BottomNavigationAction
+          label={translations.alerts[lang]}
+          icon={<NotificationsIcon />}
+        />
       </BottomNavigation>
     </Box>
   );
