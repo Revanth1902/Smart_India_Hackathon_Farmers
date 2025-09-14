@@ -1,75 +1,70 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import Box from "@mui/material/Box";
+import Cookies from "js-cookie";
 
+// Components
 import AuthWithOTP from "./components/AuthForm";
 import Home from "./components/Homepage";
+import LandingPage from "./components/Dashboard";
 import ProtectedRoute from "./ProtectedRoute";
-import LandingPage from "./components/Dashboard"; // fixed typo: LandindgPage -> LandingPage
-
-// Your existing MUI components
 import Header from "./components/Navbar";
 import VoiceAssistantButton from "./components/VoiceAsssistant";
 import SummaryBar from "./components/Summary";
 import FooterNav from "./components/Footer";
-
-// Example pages from your first code snippet
 import CropAdvisoryPage from "./pages/CropAdvisory";
 import FertilizerRecommendationPage from "./pages/FertilizerRecommendation";
 import DiseaseDetectionPage from "./pages/DiseaseDetection";
 import WeatherPestAlertsPage from "./pages/WeatherPestAlerts";
+import WelcomePage from "./components/WelcomePage";
 
 const theme = createTheme({
   palette: {
-    primary: {
-      main: "#4CAF50",
-    },
-    secondary: {
-      main: "#2196F3",
-    },
-    error: {
-      main: "#F44336",
-    },
-    background: {
-      default: "#f0f2f5",
-      paper: "#ffffff",
-    },
+    primary: { main: "#4CAF50" },
+    secondary: { main: "#2196F3" },
+    error: { main: "#F44336" },
+    background: { default: "#f0f2f5", paper: "#ffffff" },
   },
-  typography: {
-    fontFamily: "Roboto, sans-serif",
-  },
+  typography: { fontFamily: "Roboto, sans-serif" },
   components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          textTransform: "none",
-        },
-      },
-    },
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          borderRadius: 12,
-        },
-      },
-    },
+    MuiButton: { styleOverrides: { root: { textTransform: "none" } } },
+    MuiCard: { styleOverrides: { root: { borderRadius: 12 } } },
   },
 });
 
-function App() {
+// Helper function to check cookie
+const isAuthenticated = () => {
+  const cookie = document.cookie.includes("authToken");
+  return cookie;
+};
+
+const App = () => {
+  const welcomeCompleted = localStorage.getItem("welcomeCompleted") === "true";
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
         <Routes>
-          {/* Public route for Authentication */}
-          <Route path="/" element={<AuthWithOTP />} />
+          {/* Redirect root to /welcome */}
+          <Route path="/" element={<Navigate to="/welcome" replace />} />
 
-          {/* All protected routes share layout with Header, FooterNav, etc */}
+          {/* Welcome Page */}
+          <Route path="/welcome" element={<WelcomePage />} />
+
+          {/* Auth route (only allowed if welcome is completed) */}
+          <Route path="/auth" element={<AuthWithOTP />} />
+
+          {/* Protected dashboard routes */}
           <Route
-            path="/*"
+            path="/dashboard/*"
             element={
               <ProtectedRoute>
                 <Box
@@ -77,13 +72,13 @@ function App() {
                     display: "flex",
                     flexDirection: "column",
                     minHeight: "100vh",
-                    pb: "56px", // space for fixed footer nav
+                    pb: "56px",
                   }}
                 >
                   <Header />
                   <Box component="main" sx={{ flexGrow: 1, p: 2 }}>
                     <Routes>
-                      <Route path="home" element={<Home />} />
+                      <Route index element={<Home />} />
                       <Route path="landing" element={<LandingPage />} />
                       <Route
                         path="crop-advisory"
@@ -101,7 +96,6 @@ function App() {
                         path="weather-pest-alerts"
                         element={<WeatherPestAlertsPage />}
                       />
-                      {/* Add more protected routes here */}
                     </Routes>
                   </Box>
                   <VoiceAssistantButton />
@@ -115,6 +109,6 @@ function App() {
       </Router>
     </ThemeProvider>
   );
-}
+};
 
 export default App;

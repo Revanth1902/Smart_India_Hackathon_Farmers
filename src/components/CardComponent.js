@@ -1,20 +1,38 @@
 import React from "react";
-import { Card, CardContent, Typography, Box } from "@mui/material";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import WbSunnyIcon from "@mui/icons-material/WbSunny";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import WaterDropIcon from "@mui/icons-material/WaterDrop";
+import { Box } from "@mui/material";
 import "../styles/Dashboard.css";
+import useLanguage from "../hooks/useLanguage"; // Your custom hook
 
-// ✅ Google Maps Preview Component
+const translations = {
+  viewOnMaps: {
+    english: "🗺️ View on Maps",
+    malayalam: "🗺️ نقشയിൽ കാണുക",
+  },
+  viewOnGoogleMaps: {
+    english: "View on Google Maps",
+    malayalam: "ഗൂഗിൾ മാപ്പിൽ കാണുക",
+  },
+  welcome: {
+    english: "Welcome, Farmer",
+    malayalam: "സ്വാഗതം, കർഷകനെ",
+  },
+  thriving: {
+    english: "Hope your farm is thriving today! 🌱",
+    malayalam: "ഇന്ന് നിങ്ങളുടെ ഫാം തളിർക്കുകയാണ് എന്ന് പ്രതീക്ഷിക്കുന്നു! 🌱",
+  },
+  myFarm: {
+    english: "My Farm",
+    malayalam: "എന്റെ ഫാം",
+  },
+};
+
 const MapPreview = ({ location }) => {
+  const lang = useLanguage();
+
   if (!location) return null;
 
   const query = encodeURIComponent(location);
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
-
-  // Free static map image from OpenStreetMap via staticmap.openstreetmap.de
-  const staticMapUrl = `https://staticmap.openstreetmap.de/staticmap.php?center=${query}&zoom=14&size=300x150&maptype=mapnik`;
 
   return (
     <Box
@@ -36,12 +54,12 @@ const MapPreview = ({ location }) => {
       }}
     >
       <a
-        href={`https://www.google.com/maps/search/?api=1&query=${location}`}
+        href={mapsUrl}
         target="_blank"
         rel="noopener noreferrer"
         className="btn maps-btn"
       >
-        🗺️ View on Maps
+        {translations.viewOnMaps[lang]}
       </a>
 
       <Box
@@ -56,31 +74,35 @@ const MapPreview = ({ location }) => {
           py: 0.5,
         }}
       >
-        View on Google Maps
+        {translations.viewOnGoogleMaps[lang]}
       </Box>
     </Box>
   );
 };
 
 export const WelcomeCard = ({ name }) => {
+  const lang = useLanguage();
+
   return (
     <div className="dashboard-welcome-card">
       <div className="dashboard-welcome-img"></div>
 
       <div className="dashboard-welcome-textbox">
         <div className="dashboard-welcome-textcontent">
-          <p className="dashboard-welcome-title">Welcome, Farmer {name}!</p>
+          <p className="dashboard-welcome-title">
+            {translations.welcome[lang]}, {name}!
+          </p>
         </div>
         <p className="dashboard-welcome-subtext">
-          Hope your farm is thriving today! 🌱
+          {translations.thriving[lang]}
         </p>
       </div>
     </div>
   );
 };
 
-// FarmInfoCard Component
 export const FarmInfoCard = ({ location }) => {
+  const lang = useLanguage();
   const mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(
     location
   )}&output=embed`;
@@ -101,7 +123,9 @@ export const FarmInfoCard = ({ location }) => {
 
       {/* Content section */}
       <div className="farm-card-content">
-        <h3 className="farm-card-title">My Farm: {location}</h3>
+        <h3 className="farm-card-title">
+          {translations.myFarm[lang]}: {location}
+        </h3>
       </div>
 
       {/* Button section */}
@@ -114,7 +138,7 @@ export const FarmInfoCard = ({ location }) => {
           rel="noopener noreferrer"
           className="farm-card-button"
         >
-          🗺️ View on Maps
+          {translations.viewOnMaps[lang]}
         </a>
       </div>
     </div>
@@ -122,6 +146,8 @@ export const FarmInfoCard = ({ location }) => {
 };
 
 export const WeatherAlertCard = ({ temp, alert, location, date }) => {
+  const lang = useLanguage();
+
   return (
     <div className="weather-alert-card">
       {/* Sun and Cloud Animation */}

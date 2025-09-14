@@ -2,8 +2,12 @@ import React from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import MicIcon from "@mui/icons-material/Mic";
+import useLanguage from "../hooks/useLanguage"; // Adjust path as needed
+import { translations } from "../utils/translations"; // Adjust path as needed
 
 function VoiceAssistantButton() {
+  const lang = useLanguage();
+
   return (
     <Box sx={{ p: 2, textAlign: "center" }}>
       <Button
@@ -19,7 +23,7 @@ function VoiceAssistantButton() {
           fontSize: "1.1rem",
         }}
       >
-        ASK WITH VOICE
+        {translations.askWithVoice[lang]}
       </Button>
     </Box>
   );

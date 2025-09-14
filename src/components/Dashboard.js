@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
-import Header from "../components/Navbar";
 import {
   WelcomeCard,
   FarmInfoCard,
@@ -8,9 +7,12 @@ import {
 } from "../components/CardComponent";
 import QuickActions from "../components/QuickActions";
 import RecentActivity from "../components/Recnets";
-import "../styles/Dashboard.css";
+import useLanguage from "../hooks/useLanguage";
+import { translations } from "../utils/translations";
 
 const Dashboard = () => {
+  const language = useLanguage();
+
   const [farmerData, setFarmerData] = useState({
     name: "Farmer",
     farmLocation: null,
@@ -20,7 +22,6 @@ const Dashboard = () => {
   const [weather, setWeather] = useState(null);
   const [locationError, setLocationError] = useState(null);
 
-  // Load user data from localStorage
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     if (storedUser) {
@@ -34,10 +35,9 @@ const Dashboard = () => {
     }
   }, []);
 
-  // Get user geolocation
   useEffect(() => {
     if (!navigator.geolocation) {
-      setLocationError("Geolocation is not supported by your browser.");
+      setLocationError(translations.locationDenied[language]);
       return;
     }
     navigator.geolocation.getCurrentPosition(
@@ -49,14 +49,11 @@ const Dashboard = () => {
         setLocationError(null);
       },
       () => {
-        setLocationError(
-          "Location access denied. Enable location to get weather updates."
-        );
+        setLocationError(translations.locationDenied[language]);
       }
     );
-  }, []);
+  }, [language]);
 
-  // Fetch weather from Open-Meteo
   useEffect(() => {
     if (!coords) return;
 
@@ -85,26 +82,22 @@ const Dashboard = () => {
   return (
     <Box className="dashboard-container">
       <main className="dashboard-main">
-        {/* Grid for cards */}
         <Box
           sx={{
             display: "grid",
             gap: 2,
-            gridTemplateColumns: {
-              xs: "1fr", // Mobile: single column
-              md: "1fr 1fr", // Desktop: 2 columns
-            },
+            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
             mb: 2,
           }}
         >
-          <WelcomeCard name={farmerData.name} />
+          <WelcomeCard
+            name={farmerData.name}
+            text={translations.welcome[language]}
+            subText={translations.thriving[language]}
+          />
 
           {farmerData.farmLocation ? (
-            <FarmInfoCard
-              location={farmerData.farmLocation}
-              temp={weather ? `${weather.temperature}°C` : "Loading..."}
-              rainfall="N/A"
-            />
+            <FarmInfoCard location={farmerData.farmLocation} />
           ) : (
             <Box
               sx={{
@@ -115,7 +108,7 @@ const Dashboard = () => {
                 textAlign: "center",
               }}
             >
-              No farm location saved. Please update your profile.
+              {translations.locationMissing[language]}
             </Box>
           )}
 
@@ -134,8 +127,11 @@ const Dashboard = () => {
           ) : weather ? (
             <WeatherAlertCard
               temp={`${weather.temperature}°C`}
-              alert={weather.weathercode === 3 ? "Cloudy" : "Clear sky"}
-              probability="N/A"
+              alert={
+                weather.weathercode === 3
+                  ? translations.weatherAlert.cloudy[language]
+                  : translations.weatherAlert.clear[language]
+              }
               date={formattedDate}
               location={farmerData.farmLocation}
             />
@@ -146,14 +142,13 @@ const Dashboard = () => {
                 textAlign: "center",
               }}
             >
-              Loading weather info...
+              {translations.weatherLoading[language]}
             </Box>
           )}
 
-          <QuickActions />
+          <QuickActions language={language} />
         </Box>
 
-        {/* RecentActivity Full Width */}
         <Box sx={{ mb: 2 }}>
           <RecentActivity />
         </Box>

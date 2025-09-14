@@ -16,7 +16,7 @@
 
 /* Card style */
 .quick-action-card {
-  background: #2cb5a0;
+  background: #2cb5a0 !important;
   color: #fff;
   border: 3px solid #7cdacc;
   border-radius: 12px;

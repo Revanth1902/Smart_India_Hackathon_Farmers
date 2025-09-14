@@ -5,7 +5,7 @@
   flex-direction: column;
   height: 100vh;
   width: 100%;
-  max-width: 450px; /* Optional: Constrain width for a mobile look on desktop */
+  max-width: 500px; /* Optional: Constrain width for a mobile look on desktop */
   margin: 0 auto;
   background-color: #e8f5e9;
 }
@@ -76,4 +76,14 @@
 
 .start-button:hover {
   background-color: #5d4037; /* A slightly lighter brown for hover effect */
+}
+.language-select {
+  margin: 1rem 0;
+  font-size: 1rem;
+}
+
+.language-select select {
+  margin-left: 0.5rem;
+  padding: 0.4rem;
+  font-size: 1rem;
 }

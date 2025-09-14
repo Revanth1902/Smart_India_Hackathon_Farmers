@@ -4,29 +4,34 @@ import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import GrassIcon from "@mui/icons-material/Grass";
 import ForumIcon from "@mui/icons-material/Forum";
 import { useNavigate } from "react-router-dom";
-import "../styles/QuickActions.css"; // Custom styling
+import { translations } from "../utils/translations";
+import "../styles/QuickActions.css";
 
-const actions = [
-  {
-    text: "Diagnose Plant Disease",
-    icon: <CameraAltIcon fontSize="large" />,
-    to: "/diagnose",
-  },
-  {
-    text: "Get Crop Recommendation",
-    icon: <GrassIcon fontSize="large" />,
-    to: "/recommend",
-  },
-  { text: "Ask Bot", icon: <ForumIcon fontSize="large" />, to: "/ask" },
-];
-
-const QuickActions = () => {
+const QuickActions = ({ language }) => {
   const navigate = useNavigate();
+
+  const actions = [
+    {
+      text: translations.actions.diagnose[language],
+      icon: <CameraAltIcon fontSize="large" />,
+      to: "/diagnose",
+    },
+    {
+      text: translations.actions.recommend[language],
+      icon: <GrassIcon fontSize="large" />,
+      to: "/recommend",
+    },
+    {
+      text: translations.actions.ask[language],
+      icon: <ForumIcon fontSize="large" />,
+      to: "/ask",
+    },
+  ];
 
   return (
     <Box className="quick-actions-wrapper">
       <Typography variant="h6" className="section-title">
-        Quick Actions
+        {translations.quickActionsTitle[language]}
       </Typography>
 
       <Box className="quick-actions-grid">
@@ -36,6 +41,7 @@ const QuickActions = () => {
             className="quick-action-card"
             elevation={3}
             onClick={() => navigate(action.to)}
+            sx={{ cursor: "pointer" }}
           >
             <div className="icon">{action.icon}</div>
             <Typography variant="body1" className="label">
