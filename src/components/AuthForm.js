@@ -181,7 +181,7 @@ export default function AuthForm() {
       localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("expiry", expiryDate.toISOString());
 
-      navigate("/landing");
+      navigate("/dashboard/landing");
 
       // Reset
       setOtpSent(false);

@@ -14,10 +14,10 @@ const translations = {
     english: "Home",
     malayalam: "ഹോം",
   },
-  advisory: {
-    english: "Advisory",
-    malayalam: "അഡ്വൈസറി",
-  },
+  // advisory: {
+  //   english: "Advisory",
+  //   malayalam: "അഡ്വൈസറി",
+  // },
   detect: {
     english: "Detect",
     malayalam: "ഡിറ്റക്റ്റ്",
@@ -25,6 +25,10 @@ const translations = {
   alerts: {
     english: "Alerts",
     malayalam: "അലർട്ട്സ്",
+  },
+  chatbot: {
+    english: "Chatbot",
+    malayalam: "ചാറ്റ്ബോട്ട്",
   },
 };
 
@@ -39,13 +43,13 @@ function FooterNav() {
       case "/dashboard/landing":
         setValue(0);
         break;
-      case "/dashboard/crop-advisory":
+      case "/dashboard/disease-detection":
         setValue(1);
         break;
-      case "/dashboard/disease-detection":
+      case "/dashboard/weather-pest-alerts":
         setValue(2);
         break;
-      case "/dashboard/weather-pest-alerts":
+      case "/dashboard/":
         setValue(3);
         break;
       default:
@@ -56,15 +60,32 @@ function FooterNav() {
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
+    // switch (newValue) {
+    //   case 0:
+    //     navigate("/dashboard/landing");
+    //     break;
+    //   case 1:
+    //     navigate("/dashboard/crop-advisory");
+    //     break;
+    //   case 2:
+    //     navigate("/dashboard/disease-detection");
+    //     break;
+    //   case 3:
+    //     navigate("/dashboard/weather-pest-alerts");
+    //     break;
+    //   default:
+    //     navigate("/");
+    //     break;
+    // }
     switch (newValue) {
       case 0:
         navigate("/dashboard/landing");
         break;
       case 1:
-        navigate("/dashboard/crop-advisory");
+        navigate("/dashboard/disease-detection");
         break;
       case 2:
-        navigate("/dashboard/disease-detection");
+        navigate("/dashboard/weather-pest-alerts");
         break;
       case 3:
         navigate("/dashboard/weather-pest-alerts");
@@ -94,16 +115,16 @@ function FooterNav() {
           icon={<HomeIcon />}
         />
         <BottomNavigationAction
-          label={translations.advisory[lang]}
-          icon={<AssignmentIcon />}
-        />
-        <BottomNavigationAction
           label={translations.detect[lang]}
           icon={<SearchIcon />}
         />
         <BottomNavigationAction
           label={translations.alerts[lang]}
           icon={<NotificationsIcon />}
+        />
+        <BottomNavigationAction
+          label={translations.chatbot[lang]}
+          icon={<AssignmentIcon />}
         />
       </BottomNavigation>
     </Box>
