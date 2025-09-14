@@ -38,7 +38,7 @@ const Dashboard = () => {
   return (
     <Box className="dashboard-container">
       {/* Header */}
-      <header className="dashboard-header">
+      {/* <header className="dashboard-header">
         <div>
           <h1 className="app-title">KRISHI SAKHI</h1>
           <span className="app-subtitle">Farming Assistant Dashboard</span>
@@ -46,7 +46,7 @@ const Dashboard = () => {
         <button className="settings-btn">
           <Settings />
         </button>
-      </header>
+      </header> */}
 
       {/* Welcome Section */}
       <section className="welcome-card">
@@ -62,7 +62,7 @@ const Dashboard = () => {
       </section>
 
       {/* Weather Section */}
-      <section className="weather-card">
+      <section className="weather-carding">
         <div className="weather-header">
           <h3>Weather Today</h3>
           <span className="weather-sub">Current conditions</span>
@@ -95,14 +95,14 @@ const Dashboard = () => {
             <strong> Diagnose Plant Disease</strong>
             <p>Get AI-powered crop advisory</p>
           </div>
-          <div
+          {/* <div
             className="action-card"
             onClick={() => navigate("/dashboard/recommend")}
           >
             <Spa fontSize="large" />
             <strong> Get Crop Recommendation</strong>
             <p>Personalized fertilizer advice</p>
-          </div>
+          </div> */}
           <div
             className="action-card"
             onClick={() => navigate("/dashboard/ask")}

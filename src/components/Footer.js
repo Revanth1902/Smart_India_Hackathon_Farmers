@@ -6,6 +6,8 @@ import AssignmentIcon from "@mui/icons-material/Assignment";
 import SearchIcon from "@mui/icons-material/Search";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import Box from "@mui/material/Box";
+import SmartToyIcon from "@mui/icons-material/SmartToy";
+
 import { useLocation, useNavigate } from "react-router-dom";
 import useLanguage from "../hooks/useLanguage"; // Import your language hook
 
@@ -49,7 +51,7 @@ function FooterNav() {
       case "/dashboard/weather-pest-alerts":
         setValue(2);
         break;
-      case "/dashboard/":
+      case "/dashboard/ask":
         setValue(3);
         break;
       default:
@@ -88,7 +90,7 @@ function FooterNav() {
         navigate("/dashboard/weather-pest-alerts");
         break;
       case 3:
-        navigate("/dashboard/weather-pest-alerts");
+        navigate("/dashboard/ask");
         break;
       default:
         navigate("/");
@@ -124,7 +126,7 @@ function FooterNav() {
         />
         <BottomNavigationAction
           label={translations.chatbot[lang]}
-          icon={<AssignmentIcon />}
+          icon={<SmartToyIcon />}
         />
       </BottomNavigation>
     </Box>
