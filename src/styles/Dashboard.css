@@ -209,3 +209,55 @@
 .footer-btn svg {
   font-size: 22px;
 }
+.dashboard-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 20px;
+  align-items: center;
+  justify-content: center; /* changed from space-between for better stacking on small screens */
+}
+
+.card {
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  width: 180px;
+  height: 120px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-icon {
+  font-size: 36px;
+  color: #4a90e2;
+  margin-bottom: 8px;
+}
+
+.card p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* 🔽 Responsive styles */
+@media (max-width: 768px) {
+  .card {
+    width: 45%; /* two cards per row on small tablets and large phones */
+    height: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    width: 100%; /* full width on very small screens */
+    height: 100px;
+  }
+}

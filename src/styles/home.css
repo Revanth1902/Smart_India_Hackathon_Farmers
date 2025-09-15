@@ -36,6 +36,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--background-light);
   color: var(--text-primary);
+  background: linear-gradient(
+      rgba(255, 255, 255, 0.4),
+      rgba(255, 255, 255, 0.4)
+    ),
+    url("https://stmaaprodfwsite.blob.core.windows.net/assets/sites/1/2021/05/AdobeStock_113406376_900x506.jpg")
+      no-repeat center center fixed;
+  background-size: cover;
+  overflow: scroll;
 }
 
 #root,

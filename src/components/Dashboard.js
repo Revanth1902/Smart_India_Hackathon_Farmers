@@ -36,7 +36,16 @@ const Dashboard = () => {
   const date = "9/14/2025";
 
   return (
-    <Box className="dashboard-container">
+    <Box
+      className="dashboard-container"
+      style={{
+        backgroundImage: `linear-gradient(rgba(255,255,255,0.4), rgba(255,255,255,0.4)), url('/BackgroundFram.jpg')`,
+        backgroundSize: "cover",
+        backgroundAttachment: "fixed",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
       {/* Header */}
       {/* <header className="dashboard-header">
         <div>
@@ -128,31 +137,30 @@ const Dashboard = () => {
       </section>
 
       {/* Footer */}
-      <footer className="dashboard-footer">
-        <nav>
-          <button
-            className="footer-btn"
-            onClick={() => navigate("/dashboard/weather")}
-          >
-            <Cloud /> Weather
-          </button>
-          <button
-            className="footer-btn"
-            onClick={() => navigate("/dashboard/marketprice")}
-          >
-            <ShowChart /> Market Prices
-          </button>
-          <button
-            className="footer-btn"
-            onClick={() => navigate("/dashboard/schemes")}
-          >
-            <Description /> Schemes
-          </button>
-          <button className="footer-btn">
-            <AccountCircle /> Profile
-          </button>
-        </nav>
-      </footer>
+      <div className="dashboard-cards">
+        <div className="card" onClick={() => navigate("/dashboard/weather")}>
+          <Cloud className="card-icon" />
+          <p>Weather</p>
+        </div>
+
+        <div
+          className="card"
+          onClick={() => navigate("/dashboard/marketprice")}
+        >
+          <ShowChart className="card-icon" />
+          <p>Market Prices</p>
+        </div>
+
+        <div className="card" onClick={() => navigate("/dashboard/schemes")}>
+          <Description className="card-icon" />
+          <p>Schemes</p>
+        </div>
+
+        <div className="card" onClick={() => navigate("/dashboard/profile")}>
+          <AccountCircle className="card-icon" />
+          <p>Profile</p>
+        </div>
+      </div>
     </Box>
   );
 };
