@@ -156,7 +156,15 @@
 
 /* Recent Activity */
 .recent-card {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.11);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 0 6px 3px rgba(255, 255, 255, 0.3);
   border-radius: 12px;
   padding: 2px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
@@ -164,14 +172,14 @@
 
 .recent-sub {
   font-size: 13px;
-  color: #666;
+  color: black;
   margin: 4px 0 16px;
 }
 
 .recent-empty {
   text-align: center;
   padding: 30px 10px;
-  color: #666;
+  color: whitesmoke !important;
 }
 .recent-empty p {
   margin: 4px 0;
@@ -259,5 +267,50 @@
   .card {
     width: 100%; /* full width on very small screens */
     height: 100px;
+  }
+}
+
+/* Loader Animation */
+.loading {
+  background-color: rgba(255, 0, 0, 0);
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  padding: 20px 0;
+}
+
+.loading div {
+  background-color: rgb(255, 217, 0);
+  width: 20px;
+  height: 20px;
+  margin: 0 10px;
+  border-radius: 50px;
+  animation-name: load912355;
+  animation-duration: 0.9s;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  text-align: center;
+  justify-content: center;
+}
+
+.loading .i {
+  animation-delay: 0s;
+}
+
+.loading .a {
+  animation-delay: 0.3s;
+}
+
+.loading .u {
+  animation-delay: 0.6s;
+}
+
+@keyframes load912355 {
+  0% {
+    transform: translateY(50px) scale(1);
+  }
+
+  100% {
+    transform: translateY(10px) scale(1.8) rotate(360deg);
   }
 }

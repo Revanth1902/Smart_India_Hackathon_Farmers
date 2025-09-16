@@ -12,6 +12,7 @@ import Cookies from "js-cookie";
 
 // Components
 import AuthWithOTP from "./components/AuthForm";
+import FarmerProfile from "./components/profile";
 import Home from "./components/Homepage";
 import LandingPage from "./components/Dashboard";
 import ProtectedRoute from "./ProtectedRoute";
@@ -109,6 +110,7 @@ const App = () => {
                       <Route path="weather" element={<WeatherPage />} />
                       <Route path="marketprice" element={<MarketPrices />} />
                       <Route path="schemes" element={<Schemes />} />
+                      <Route path="profile" element={<FarmerProfile />} />
                     </Routes>
                   </Box>
                   {/* <VoiceAssistantButton />

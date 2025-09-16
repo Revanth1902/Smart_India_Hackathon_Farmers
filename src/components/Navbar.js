@@ -6,10 +6,13 @@ import {
   Box,
   CircularProgress,
   Fade,
+  IconButton,
 } from "@mui/material";
 import WbSunnyIcon from "@mui/icons-material/WbSunny";
 import AgricultureIcon from "@mui/icons-material/Agriculture";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { styled } from "@mui/system";
+import { useNavigate } from "react-router-dom";
 
 const StyledAppBar = styled(AppBar)({
   backgroundColor: "#2f855a", // Deep green
@@ -19,6 +22,7 @@ const StyledAppBar = styled(AppBar)({
 export default function Navbar() {
   const [weather, setWeather] = useState(null);
   const [formattedDate, setFormattedDate] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch(
@@ -28,7 +32,7 @@ export default function Navbar() {
       .then((data) => {
         setWeather(data.current_weather);
 
-        // ✅ Format the date
+        // Format the date
         const date = new Date(data.current_weather.time);
         const formatter = new Intl.DateTimeFormat("en-IN", {
           weekday: "long",
@@ -43,6 +47,10 @@ export default function Navbar() {
         setFormattedDate("");
       });
   }, []);
+
+  const handleProfileClick = () => {
+    navigate("/dashboard/profile");
+  };
 
   return (
     <StyledAppBar position="static">
@@ -69,12 +77,11 @@ export default function Navbar() {
           </Typography>
         </Box>
 
-        {/*         
-        <Box display="flex" alignItems="center">
+        {/* Weather info - commented out for now */}
+        {/* <Box display="flex" alignItems="center">
           {weather ? (
             <Fade in={true} timeout={1000}>
               <Box display="flex" flexDirection="column" alignItems="flex-end">
-             =
                 <Box display="flex" alignItems="center" gap={1}>
                   <WbSunnyIcon sx={{ color: "#ffeb3b" }} />
                   <Typography sx={{ color: "#fff" }}>
@@ -82,7 +89,6 @@ export default function Navbar() {
                   </Typography>
                 </Box>
 
-                
                 <Typography
                   variant="body2"
                   sx={{ color: "#fff", fontStyle: "italic", mt: 0.5 }}
@@ -94,7 +100,17 @@ export default function Navbar() {
           ) : (
             <CircularProgress size={22} sx={{ color: "#fff" }} />
           )}
-        </Box>  */}
+        </Box> */}
+
+        {/* Profile icon */}
+        <IconButton
+          onClick={handleProfileClick}
+          sx={{ color: "#fff" }}
+          aria-label="profile"
+          size="large"
+        >
+          <AccountCircleIcon fontSize="inherit" />
+        </IconButton>
       </Toolbar>
     </StyledAppBar>
   );

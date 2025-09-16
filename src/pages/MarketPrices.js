@@ -1,5 +1,11 @@
-import React from "react";
-import { Card, CardContent, Typography, Box, Divider } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  CircularProgress,
+} from "@mui/material";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import GrainIcon from "@mui/icons-material/Grain";
 import EmojiNatureIcon from "@mui/icons-material/EmojiNature";
@@ -7,50 +13,96 @@ import LocalFloristIcon from "@mui/icons-material/LocalFlorist";
 import SpaIcon from "@mui/icons-material/Spa";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 
-const marketData = [
-  {
-    name: "Rice",
-    type: "Basmati - Kochi Mandi",
-    price: 45,
-    unit: "per kg",
-    date: "9/14/2025",
-    icon: <GrainIcon />,
-  },
-  {
-    name: "Coconut",
-    type: "Green - Thrissur Market",
-    price: 25,
-    unit: "per kg",
-    date: "9/14/2025",
-    icon: <EmojiNatureIcon />,
-  },
-  {
-    name: "Pepper",
-    type: "Black - Cochin Spice Market",
-    price: 800,
-    unit: "per kg",
-    date: "9/14/2025",
-    icon: <LocalFloristIcon />,
-  },
-  {
-    name: "Cardamom",
-    type: "Green - Kumily Market",
-    price: 1200,
-    unit: "per kg",
-    date: "9/14/2025",
-    icon: <SpaIcon />,
-  },
-  {
-    name: "Banana",
-    type: "Nendran - Palakkad Market",
-    price: 35,
-    unit: "per kg",
-    date: "9/14/2025",
-    icon: <RestaurantIcon />,
-  },
+const iconMap = {
+  Rice: <GrainIcon />,
+  Coconut: <EmojiNatureIcon />,
+  Pepper: <LocalFloristIcon />,
+  Cardamom: <SpaIcon />,
+  Banana: <RestaurantIcon />,
+  Tomato: <EmojiNatureIcon />, // Reusing emoji for Tomato
+};
+
+const productsToFetch = [
+  { searchTerm: "coconut" },
+  { searchTerm: "banana" },
+  { searchTerm: "tomato" },
+  { searchTerm: "pepper" },
+  { searchTerm: "cardamom" },
 ];
 
+function getRandomPrice(min = 20, max = 200) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 export default function MarketPrices() {
+  const [marketData, setMarketData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const results = await Promise.all(
+          productsToFetch.map(async ({ searchTerm }) => {
+            const response = await fetch(
+              `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${searchTerm}&search_simple=1&action=process&json=1&page_size=1`
+            );
+            const data = await response.json();
+
+            if (data.products && data.products.length > 0) {
+              const product = data.products[0];
+
+              return {
+                name: product.product_name || searchTerm,
+                type: product.categories || "Unknown category",
+                price: getRandomPrice(30, 150),
+                unit: "per kg",
+                date: new Date().toLocaleDateString(),
+                icon: iconMap[
+                  searchTerm.charAt(0).toUpperCase() + searchTerm.slice(1)
+                ] || <GrainIcon />,
+              };
+            } else {
+              return {
+                name: searchTerm,
+                type: "No data",
+                price: getRandomPrice(30, 150),
+                unit: "per kg",
+                date: new Date().toLocaleDateString(),
+                icon: <GrainIcon />,
+              };
+            }
+          })
+        );
+
+        setMarketData(results);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message || "Failed to fetch data");
+        setLoading(false);
+      }
+    }
+
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <Box sx={{ p: 3, textAlign: "center" }}>
+        <CircularProgress />
+        <Typography>Loading market data...</Typography>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography color="error">Error: {error}</Typography>
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#fff7f2", p: 3 }}>
       {/* Header */}
@@ -66,10 +118,10 @@ export default function MarketPrices() {
         <TrendingUpIcon fontSize="large" />
         <Box>
           <Typography variant="h6" fontWeight="bold">
-            Current Market Prices - Kerala
+            Current Market Prices - Kerala (Demo)
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Latest prices from local mandis and markets
+            Dynamic data fetched from OpenFoodFacts (prices are random)
           </Typography>
         </Box>
       </Box>
@@ -99,11 +151,15 @@ export default function MarketPrices() {
                   <Typography variant="subtitle1" fontWeight="bold">
                     {item.name}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ maxWidth: 250 }}
+                  >
                     {item.type}
                   </Typography>
                   <Typography variant="caption" color="text.disabled">
-                    Kerala
+                    Kerala (demo)
                   </Typography>
                 </Box>
               </Box>
