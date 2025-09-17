@@ -14,47 +14,90 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/system";
 
-import useLanguage from "../hooks/useLanguage"; // ✅ Import your hook
-import { translations } from "../utils/translations"; // ✅ Import translations
+import useLanguage from "../hooks/useLanguage"; // Your hook to get language
 
-// Disease info
+// Disease info with precautions
+// Updated diseaseDatabase with fertilizers added
 const diseaseDatabase = {
-  "Powdery Mildew": {
+  "Banana Freckle": {
+    scientificName: "Phyllostica cavendishii",
     precautions: [
-      "Avoid overhead irrigation.",
-      "Use resistant varieties.",
-      "Apply fungicides early.",
-    ],
-  },
-  "Leaf Rust": {
-    precautions: [
-      "Remove infected leaves.",
-      "Use resistant crop varieties.",
+      "Remove infected banana leaves.",
+      "Use disease-free planting material.",
       "Apply recommended fungicides.",
     ],
+    fertilizers: [
+      "Balanced NPK fertilizer (10-10-10)",
+      "Potassium-rich fertilizer",
+      "Organic compost",
+    ],
   },
-  Blight: {
+  "Sheath Blight of Rice": {
     precautions: [
-      "Remove and destroy infected plants.",
-      "Avoid excessive nitrogen fertilizer.",
-      "Apply copper-based fungicides.",
+      "Maintain proper water management.",
+      "Avoid dense planting to improve air circulation.",
+      "Use fungicides as advised by experts.",
+    ],
+    fertilizers: [
+      "Nitrogen fertilizer (Urea)",
+      "Phosphorus fertilizer (Single Super Phosphate)",
+      "Potassium fertilizer (Muriate of Potash)",
+    ],
+  },
+  "Coconut Disease": {
+    precautions: [
+      "Remove and destroy affected fronds.",
+      "Apply copper-based fungicides regularly.",
+      "Ensure good soil drainage.",
+    ],
+    fertilizers: [
+      "Coconut-specific NPK fertilizers",
+      "Magnesium sulfate",
+      "Organic mulch and compost",
+    ],
+  },
+  "Rubber Disease": {
+    precautions: [
+      "Prune infected branches.",
+      "Apply fungicides on affected trees.",
+      "Maintain tree vigor through balanced fertilization.",
+    ],
+    fertilizers: [
+      "Balanced NPK fertilizer",
+      "Calcium and Magnesium supplements",
+      "Organic manure",
+    ],
+  },
+  "Garlic Rust": {
+    precautions: [
+      "Remove infected leaves promptly.",
+      "Avoid overhead irrigation.",
+      "Use resistant varieties if available.",
+    ],
+    fertilizers: [
+      "Nitrogen fertilizer",
+      "Phosphorus fertilizer",
+      "Potassium fertilizer",
     ],
   },
 };
 
+// Mock disease detection based on image file name
 function mockDetectDisease(imageFile) {
   return new Promise((resolve) => {
     setTimeout(() => {
       const name = imageFile.name.toLowerCase();
-      if (name.includes("rust")) resolve("Leaf Rust");
-      else if (name.includes("mildew")) resolve("Powdery Mildew");
-      else if (name.includes("blight")) resolve("Blight");
-      else resolve(null); // no disease
+      if (name.includes("banana")) resolve("Banana Freckle");
+      else if (name.includes("rice")) resolve("Sheath Blight of Rice");
+      else if (name.includes("coconut")) resolve("Coconut Disease");
+      else if (name.includes("rubber")) resolve("Rubber Disease");
+      else if (name.includes("garlic")) resolve("Garlic Rust");
+      else resolve(null);
     }, 1500);
   });
 }
 
-// Styled
+// Styled components
 const UploadCard = styled(Card)(({ theme }) => ({
   maxWidth: "100%",
   margin: "auto",
@@ -77,23 +120,14 @@ export default function DiseaseDetector() {
   const [disease, setDisease] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [autoDetectDone, setAutoDetectDone] = useState(false); // Track if auto detect done
 
-  const language = useLanguage(); // ✅ Get current language
+  const language = useLanguage(); // get current language
 
-  const handleImageChange = (e) => {
-    setDisease(null);
-    setError("");
-    const file = e.target.files[0];
-    if (file) {
-      setImage(file);
-      setPreview(URL.createObjectURL(file));
-    }
-  };
-
-  const handleDetect = async () => {
+  const detectDisease = async (img) => {
     setError("");
     setDisease(null);
-    if (!image) {
+    if (!img) {
       setError(
         language === "malayalam"
           ? "ദയവായി ഒരു ഇമേജ് അപ്‌ലോഡ് ചെയ്യുക."
@@ -104,7 +138,7 @@ export default function DiseaseDetector() {
 
     setLoading(true);
     try {
-      const detected = await mockDetectDisease(image);
+      const detected = await mockDetectDisease(img);
       setDisease(detected);
     } catch (e) {
       setError(
@@ -114,6 +148,34 @@ export default function DiseaseDetector() {
       );
     }
     setLoading(false);
+  };
+
+  const handleImageChange = async (e) => {
+    setDisease(null);
+    setError("");
+    setAutoDetectDone(false); // Reset auto detect flag on new upload
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      setPreview(URL.createObjectURL(file));
+
+      // Automatically detect disease on first upload
+      await detectDisease(file);
+      setAutoDetectDone(true);
+    }
+  };
+
+  const handleDetect = async () => {
+    if (!image) {
+      setError(
+        language === "malayalam"
+          ? "ദയവായി ഒരു ഇമേജ് അപ്‌ലോഡ് ചെയ്യുക."
+          : "Please upload an image first."
+      );
+      return;
+    }
+    // Manual detection triggered by button click
+    await detectDisease(image);
   };
 
   return (
@@ -243,6 +305,22 @@ export default function DiseaseDetector() {
                     </li>
                   ))}
                 </Box>
+                <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
+                  {language === "malayalam"
+                    ? "ശുപാർശ ചെയ്ത ഉണക്കവളങ്ങൾ:"
+                    : "Suggested Fertilizers:"}
+                </Typography>
+                <Box component="ul" sx={{ pl: 3 }}>
+                  {diseaseDatabase[disease].fertilizers.map((fert, idx) => (
+                    <li key={idx}>
+                      <Typography variant="body1">
+                        {language === "malayalam"
+                          ? translateFertilizer(fert)
+                          : fert}
+                      </Typography>
+                    </li>
+                  ))}
+                </Box>
               </ResultCard>
             </Slide>
           )}
@@ -251,32 +329,64 @@ export default function DiseaseDetector() {
     </Container>
   );
 }
+const translateFertilizer = (fert) => {
+  const fertMap = {
+    "Balanced NPK fertilizer (10-10-10)": "സമതുലിതമായ NPK ഉണക്കവളം (10-10-10)",
+    "Potassium-rich fertilizer": "പൊട്ടാസ്യം സമൃദ്ധമായ ഉണക്കവളം",
+    "Organic compost": "ഓർഗാനിക് കോമ്പോസ്റ്റ്",
+    "Nitrogen fertilizer (Urea)": "നൈട്രജൻ ഉണക്കവളം (യൂറിയ)",
+    "Phosphorus fertilizer (Single Super Phosphate)":
+      "ഫോസ്ഫറസ് ഉണക്കവളം (സിംഗിൾ സൂപ്പർ ഫോസ്ഫേറ്റ്)",
+    "Potassium fertilizer (Muriate of Potash)":
+      "പൊട്ടാസ്യം ഉണക്കവളം (മ്യൂരിയേറ്റ് ഓഫ് പൊട്ടാഷ്)",
+    "Coconut-specific NPK fertilizers": "തെങ്ങിനുള്ള പ്രത്യേക NPK ഉണക്കവളങ്ങൾ",
+    "Magnesium sulfate": "മഗ്നീഷ്യം സൾഫേറ്റ്",
+    "Organic mulch and compost": "ഓർഗാനിക് മൾച്ച് மற்றும் കോമ്പോസ്റ്റ്",
+    "Balanced NPK fertilizer": "സമതുലിതമായ NPK ഉണക്കവളം",
+    "Calcium and Magnesium supplements": "കാല്ഷ്യം, മഗ്നീഷ്യം സപ്ലിമെന്റുകൾ",
+    "Organic manure": "ഓർഗാനിക് വളം",
+    "Nitrogen fertilizer": "നൈട്രജൻ ഉണക്കവളം",
+    "Phosphorus fertilizer": "ഫോസ്ഫറസ് ഉണക്കവളം",
+    "Potassium fertilizer": "പൊട്ടാസ്യം ഉണക്കവളം",
+  };
+  return fertMap[fert] || fert;
+};
 
-// Optional: Malayalam translations for disease names
+// Malayalam translations for disease names
 const translateDiseaseName = (name) => {
   const map = {
-    "Powdery Mildew": "പൗഡറി മിൽഡ്യൂ",
-    "Leaf Rust": "ഇല മുളകുരോഗം",
-    Blight: "ബ്ലൈറ്റ്",
+    "Banana Freckle": "ബനാന ഫ്രെകി (ഫൈലോസ്റ്റെറിക കാവെൻഡിഷി)",
+    "Sheath Blight of Rice": "അരിപ്പടി ഷീത്ത് ബ്ലൈറ്റ്",
+    "Coconut Disease": "തെങ്ങ് രോഗം",
+    "Rubber Disease": "റബ്ബർ രോഗം",
+    "Garlic Rust": "വെളുത്തുള്ളി റസ്റ്റ്",
   };
   return map[name] || name;
 };
 
-// Optional: Translate some common tips (add more as needed)
+// Malayalam translations for precautions
 const translateTip = (tip) => {
   const tipsMap = {
+    "Remove infected banana leaves.": "സംക്രമിച്ച ബനാന ഇലകൾ നീക്കം ചെയ്യുക.",
+    "Use disease-free planting material.": "രോഗമുക്തമായ വിത്ത് ഉപയോഗിക്കുക.",
+    "Apply recommended fungicides.": "ശുപാർശ ചെയ്ത ഫംഗിസൈഡ് പ്രയോഗിക്കുക.",
+    "Maintain proper water management.": "ശുദ്ധമായ ജലക്രമം പാലിക്കുക.",
+    "Avoid dense planting to improve air circulation.":
+      "മൂടിയുള്ള തോട്ടം ഒഴിവാക്കുക.",
+    "Use fungicides as advised by experts.":
+      "വൈദ്യരുടെ നിർദ്ദേശപ്രകാരം ഫംഗിസൈഡ് പ്രയോഗിക്കുക.",
+    "Remove and destroy affected fronds.":
+      "ബാധിതമായ ഇലകൾ നീക്കം ചെയ്ത് നശിപ്പിക്കുക.",
+    "Apply copper-based fungicides regularly.":
+      "കാപ്പർ അടങ്ങിയ ഫംഗിസൈഡ് സ്ഥിരമായി പ്രയോഗിക്കുക.",
+    "Ensure good soil drainage.": "മണ്ണിന്റെ ജലമൊഴുക്ക് ഉറപ്പാക്കുക.",
+    "Prune infected branches.": "ബാധിത ശാഖകൾ മുറിച്ചു കളയുക.",
+    "Maintain tree vigor through balanced fertilization.":
+      "സമതുലിതമായി പകൽവൃക്ഷം വളർത്തുക.",
+    "Remove infected leaves promptly.": "സംക്രമിച്ച ഇലകൾ ഉടൻ നീക്കം ചെയ്യുക.",
     "Avoid overhead irrigation.": "മുകളിലൂടെ വെള്ളം വിതറുന്നത് ഒഴിവാക്കുക.",
-    "Use resistant varieties.": "രോഗപ്രതിരോധ ശേഷിയുള്ള ഇനം ഉപയോഗിക്കുക.",
-    "Apply fungicides early.": "ഫംഗിസൈഡ് നേരത്തെ പ്രയോഗിക്കുക.",
-    "Remove infected leaves.": "സംക്രമിച്ച ഇലകൾ നീക്കം ചെയ്യുക.",
-    "Use resistant crop varieties.":
-      "രോഗപ്രതിരോധ ശേഷിയുള്ള വിള ഇനങ്ങൾ ഉപയോഗിക്കുക.",
-    "Apply recommended fungicides.": "ശുപാർശ ചെയ്ത ഫംഗിസൈഡ് ഉപയോഗിക്കുക.",
-    "Remove and destroy infected plants.":
-      "രോഗബാധിതമായ ചെടികൾ നീക്കി നശിപ്പിക്കുക.",
-    "Avoid excessive nitrogen fertilizer.":
-      "അതിർത്തി നൈട്രജൻ ഫർട്ടിലൈസർ ഒഴിവാക്കുക.",
-    "Apply copper-based fungicides.": "കപ്പർ അടങ്ങിയ ഫംഗിസൈഡ് പ്രയോഗിക്കുക.",
+    "Use resistant varieties if available.":
+      "പ്രതിരോധ ശേഷിയുള്ള ഇനങ്ങൾ ഉപയോഗിക്കുക.",
   };
   return tipsMap[tip] || tip;
 };
