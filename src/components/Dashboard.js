@@ -14,34 +14,37 @@ import {
   AccountCircle,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import useLanguage from "../hooks/useLanguage";
+import { translations } from "../utils/translations"; // adjust path accordingly
 import "../styles/Dashboard.css";
 
 const Dashboard = () => {
+  const language = useLanguage();
+
+  // Loader component (simple spinner)
   const Loader = () => (
     <div className="loading" style={{ justifyContent: "center", padding: 20 }}>
-      <div className="i"></div>
-      <div className="a"></div>
-      <div className="u"></div>
+      <div className="spinner" />
     </div>
   );
 
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
-  // Initial farmer data
+  // Safe parse user from localStorage
+  let user = null;
+  try {
+    user = JSON.parse(localStorage.getItem("user"));
+  } catch {
+    user = null;
+  }
+
   let farmerData = {
     name: "Farmer Anish",
     farmLocation: "Kerala",
   };
 
-  // Load user data from localStorage
-  const user = JSON.parse(localStorage.getItem("user"));
-
-  // Check if user data exists before using it
   if (user) {
-    console.log("User loaded from localStorage:", user);
-
-    // Add user data to farmerData
     farmerData = {
       ...farmerData,
       userId: user.id,
@@ -51,23 +54,18 @@ const Dashboard = () => {
       district: user.district,
       village: user.village,
     };
-
-    console.log("Combined farmer data:", farmerData);
-  } else {
-    console.warn("No user found in localStorage.");
   }
 
   const [weather, setWeather] = useState({
     temp: "--",
     rainfall: "--",
     humidity: "--",
-    alert: "No weather alert",
+    alert: translations.weather.noAlert[language],
   });
 
   const [date, setDate] = useState("");
 
   useEffect(() => {
-    // Format today's date
     const today = new Date();
     const formattedDate = today.toLocaleDateString("en-IN", {
       day: "2-digit",
@@ -76,40 +74,37 @@ const Dashboard = () => {
     });
     setDate(formattedDate);
 
-    // Start loading
     setLoading(true);
 
-    // Fetch weather from wttr.in for Kerala (no API key needed)
     fetch("https://wttr.in/Kerala?format=j1")
       .then((res) => res.json())
       .then((data) => {
-        // Current condition
         const current = data.current_condition[0];
         const hourly = data.weather[0].hourly[0];
 
         setWeather({
           temp: `${current.temp_C}°C`,
           humidity: `${current.humidity}%`,
-          rainfall: `${hourly.chanceofrain || "0"} mm`,
+          // Use precipMM for rainfall amount (mm)
+          rainfall: `${hourly.precipMM || "0"} mm`,
           alert:
             hourly.weatherDesc && hourly.weatherDesc[0]
               ? hourly.weatherDesc[0].value
-              : "No weather alert",
+              : translations.weather.noAlert[language],
         });
 
-        setLoading(false); // ✅ done loading
+        setLoading(false);
       })
-      .catch((err) => {
-        console.error("Weather fetch error:", err);
+      .catch(() => {
         setWeather({
           temp: "--",
           rainfall: "--",
           humidity: "--",
-          alert: "Unable to load weather data",
+          alert: translations.weather.error[language],
         });
-        setLoading(false); // ✅ even on error
+        setLoading(false);
       });
-  }, []);
+  }, [language]);
 
   return (
     <Box
@@ -128,15 +123,18 @@ const Dashboard = () => {
       <section className="welcome-card" style={{ marginBottom: 24 }}>
         <div>
           <h2>
-            Welcome, <span>{farmerData.userName}!</span>
+            {translations.welcome[language]},{" "}
+            <span>{farmerData.userName || farmerData.name}!</span>
           </h2>
           <p>
-            <LocationOn fontSize="small" /> My Farm: {farmerData.village},
-            {farmerData.district}, {farmerData.state} 
+            <LocationOn fontSize="small" /> {translations.myFarm[language]}:{" "}
+            {farmerData.village && farmerData.district && farmerData.state
+              ? `${farmerData.village}, ${farmerData.district}, ${farmerData.state}`
+              : translations.locationMissing[language]}
           </p>
         </div>
         <div className="date-box" style={{ fontWeight: "bold" }}>
-          Today’s Date {date}
+          {translations.todayDate[language]} {date}
         </div>
       </section>
 
@@ -153,9 +151,9 @@ const Dashboard = () => {
         }}
       >
         <div className="weather-header" style={{ marginBottom: 12 }}>
-          <h3>Weather Today</h3>
+          <h3>{translations.weatherToday[language]}</h3>
           <span className="weather-sub" style={{ color: "#555" }}>
-            Current conditions
+            {translations.currentConditions[language]}
           </span>
         </div>
 
@@ -172,13 +170,22 @@ const Dashboard = () => {
                 marginBottom: 12,
               }}
             >
-              <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span
+                style={{ display: "flex", alignItems: "center", gap: 6 }}
+                title="Temperature"
+              >
                 <WbSunny style={{ color: "#fbc02d" }} /> {weather.temp}
               </span>
-              <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span
+                style={{ display: "flex", alignItems: "center", gap: 6 }}
+                title="Rainfall"
+              >
                 <Thunderstorm style={{ color: "#0288d1" }} /> {weather.rainfall}
               </span>
-              <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span
+                style={{ display: "flex", alignItems: "center", gap: 6 }}
+                title="Humidity"
+              >
                 <Opacity style={{ color: "#4caf50" }} /> {weather.humidity}
               </span>
             </div>
@@ -191,6 +198,7 @@ const Dashboard = () => {
                 color: "#d32f2f",
                 fontWeight: "bold",
               }}
+              title="Weather Alert"
             >
               <Warning />
               {weather.alert}
@@ -201,7 +209,7 @@ const Dashboard = () => {
 
       {/* Quick Actions */}
       <section>
-        <h3 className="section-title">Quick Actions</h3>
+        <h3 className="section-title">{translations.quickActions[language]}</h3>
         <div
           className="quick-actions"
           style={{
@@ -212,62 +220,28 @@ const Dashboard = () => {
           }}
         >
           <div
-            className="action-card"
+            className="action-card diagnose-action"
             onClick={() => navigate("/dashboard/diagnose")}
-            style={{
-              cursor: "pointer",
-              flex: "1 1 200px",
-              backgroundColor: "#e0f7fa",
-              padding: 16,
-              borderRadius: 12,
-              textAlign: "center",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-              transition: "background-color 0.3s ease",
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.backgroundColor = "#b2ebf2")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.backgroundColor = "#e0f7fa")
-            }
           >
             <CameraAlt fontSize="large" style={{ color: "#00796b" }} />
-            <strong> Diagnose Plant Disease</strong>
-            <p>Get AI-powered crop advisory</p>
+            <strong>{translations.diagnosePlant[language]}</strong>
+            <p>{translations.diagnoseDesc[language]}</p>
           </div>
           <div
-            className="action-card"
+            className="action-card askbot-action"
             onClick={() => navigate("/dashboard/ask")}
-            style={{
-              cursor: "pointer",
-              flex: "1 1 200px",
-              backgroundColor: "#f3e5f5",
-              padding: 16,
-              borderRadius: 12,
-              textAlign: "center",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-              transition: "background-color 0.3s ease",
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.backgroundColor = "#ce93d8")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.backgroundColor = "#f3e5f5")
-            }
           >
             <Chat fontSize="large" style={{ color: "#6a1b9a" }} />
-            <strong> Ask Bot</strong>
-            <p>Chat with AI farming assistant</p>
+            <strong>{translations.askBot[language]}</strong>
+            <p>{translations.askBotDesc[language]}</p>
           </div>
         </div>
       </section>
 
       {/* Recent Activity */}
       <section className="recent-card" style={{ marginTop: 40 }}>
-        <h3>Recent Activity</h3>
-        <p className="recent-sub">
-          Your latest farming queries and recommendations
-        </p>
+        <h3>{translations.recentActivity[language]}</h3>
+        <p className="recent-sub">{translations.recentSub[language]}</p>
         <div
           className="recent-empty"
           style={{
@@ -278,12 +252,12 @@ const Dashboard = () => {
           }}
         >
           <Description style={{ fontSize: 40, color: "rgb(106, 27, 154)" }} />
-          <p>No recent activity</p>
-          <p>Start by asking for crop advisory</p>
+          <p>{translations.noRecent[language]}</p>
+          <p>{translations.startBy[language]}</p>
         </div>
       </section>
 
-      {/* Footer */}
+      {/* Footer Cards */}
       <div
         className="dashboard-cards"
         style={{
@@ -300,7 +274,7 @@ const Dashboard = () => {
           style={{ cursor: "pointer", textAlign: "center" }}
         >
           <Cloud style={{ fontSize: 36, color: "#1976d2" }} />
-          <p>Weather</p>
+          <p>{translations.weather[language]}</p>
         </div>
 
         <div
@@ -309,7 +283,7 @@ const Dashboard = () => {
           style={{ cursor: "pointer", textAlign: "center" }}
         >
           <ShowChart style={{ fontSize: 36, color: "#388e3c" }} />
-          <p>Market Prices</p>
+          <p>{translations.marketPrices[language]}</p>
         </div>
 
         <div
@@ -318,7 +292,7 @@ const Dashboard = () => {
           style={{ cursor: "pointer", textAlign: "center" }}
         >
           <Description style={{ fontSize: 36, color: "#f57c00" }} />
-          <p>Schemes</p>
+          <p>{translations.schemes[language]}</p>
         </div>
 
         <div
@@ -327,7 +301,7 @@ const Dashboard = () => {
           style={{ cursor: "pointer", textAlign: "center" }}
         >
           <AccountCircle style={{ fontSize: 36, color: "#6d4c41" }} />
-          <p>Profile</p>
+          <p>{translations.profile[language]}</p>
         </div>
       </div>
     </Box>
