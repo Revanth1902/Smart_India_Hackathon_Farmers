@@ -4,6 +4,21 @@ import "../styles/Schemes.css";
 
 const schemes = [
   {
+    title: "Organic Kerala Mission",
+    status: "Active",
+    description:
+      "Promotes organic farming across Kerala with subsidies and training.",
+    eligibility: ["Farmers practicing or transitioning to organic methods"],
+    benefits: [
+      "Subsidy on organic inputs",
+      "Training sessions and workshops",
+      "Certification assistance",
+    ],
+    howToApply:
+      "Contact local Agricultural Officer or register at krishi.kerala.gov.in",
+    contact: "Department of Agriculture Development: 0471-2303990",
+  },
+  {
     title: "PM-KISAN",
     status: "Active",
     description: "Direct income support to farmers",
@@ -41,15 +56,50 @@ const schemes = [
     howToApply: "Apply through banks, insurance companies, or online portal",
     contact: "Helpline: 14447",
   },
+
+  // 🔽 DUMMY KERALA-SPECIFIC SCHEMES BELOW
+
+  {
+    title: "Karshaka Raksha Scheme",
+    status: "Active",
+    description:
+      "State-sponsored life and accident insurance for registered farmers in Kerala.",
+    eligibility: ["Registered Kerala farmers", "Aged 18–60 years"],
+    benefits: [
+      "₹2 lakh life insurance",
+      "₹1 lakh accident coverage",
+      "Premium paid by Kerala government",
+    ],
+    howToApply: "Register at Krishi Bhavan or through the Karshaka app",
+    contact: "Helpline: 1800-425-1661",
+  },
+
+  {
+    title: "Pokkali Paddy Promotion Scheme",
+    status: "Active",
+    description:
+      "Special scheme for farmers cultivating Pokkali rice in coastal Kerala areas.",
+    eligibility: [
+      "Farmers in Ernakulam, Alappuzha, and nearby coastal regions",
+      "Pokkali variety cultivators",
+    ],
+    benefits: [
+      "Financial support per acre",
+      "Marketing support for Pokkali rice",
+      "Assistance for mechanization",
+    ],
+    howToApply: "Apply through local Krishi Bhavan",
+    contact: "District Agricultural Office: 0484-2422266",
+  },
 ];
 
 export default function Schemes() {
   return (
-    <div className="app">
-      <header className="header">
+    <div className="apping">
+      {/* <header className="header">
         <h2>KRISHI SAKHI</h2>
         <p>Government Schemes</p>
-      </header>
+      </header> */}
 
       <div className="container">
         <div className="section-title">

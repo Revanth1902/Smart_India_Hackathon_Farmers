@@ -28,10 +28,34 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
-  const farmerData = {
+  // Initial farmer data
+  let farmerData = {
     name: "Farmer Anish",
     farmLocation: "Kerala",
   };
+
+  // Load user data from localStorage
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  // Check if user data exists before using it
+  if (user) {
+    console.log("User loaded from localStorage:", user);
+
+    // Add user data to farmerData
+    farmerData = {
+      ...farmerData,
+      userId: user.id,
+      userName: user.name,
+      mobile: user.mobile,
+      state: user.state,
+      district: user.district,
+      village: user.village,
+    };
+
+    console.log("Combined farmer data:", farmerData);
+  } else {
+    console.warn("No user found in localStorage.");
+  }
 
   const [weather, setWeather] = useState({
     temp: "--",
@@ -104,10 +128,11 @@ const Dashboard = () => {
       <section className="welcome-card" style={{ marginBottom: 24 }}>
         <div>
           <h2>
-            Welcome, <span>{farmerData.name}!</span>
+            Welcome, <span>{farmerData.userName}!</span>
           </h2>
           <p>
-            <LocationOn fontSize="small" /> My Farm: {farmerData.farmLocation}
+            <LocationOn fontSize="small" /> My Farm: {farmerData.village},
+            {farmerData.district}
           </p>
         </div>
         <div className="date-box" style={{ fontWeight: "bold" }}>
