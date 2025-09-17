@@ -7,6 +7,7 @@ const EXPIRY_DAYS = 30;
 
 const ChatPage = () => {
   const messagesEndRef = useRef(null);
+  const [isBotTyping, setIsBotTyping] = useState(false);
 
   // Load messages from localStorage with expiry check
   const loadStoredMessages = () => {
@@ -78,9 +79,8 @@ const ChatPage = () => {
       }, 150);
     });
   };
-
   const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || isBotTyping) return;
 
     const userMessage = { sender: "user", text: input };
     setMessages((prev) => [...prev, userMessage]);
@@ -88,7 +88,7 @@ const ChatPage = () => {
     setInput("");
     setIsLoading(true);
 
-    // Show loading dots while waiting for API
+    // Show loading animation
     setMessages((prev) => [...prev, { sender: "bot", text: "..." }]);
 
     try {
@@ -111,11 +111,10 @@ const ChatPage = () => {
       const botReply =
         data.fulfillmentText || "Sorry, I didn't understand that.";
 
-      // Remove loading message first
-      setMessages((prev) => [...prev.slice(0, -1)]);
+      setMessages((prev) => [...prev.slice(0, -1)]); // Remove loader
+      setIsBotTyping(true); // Lock UI during animation
 
-      // Animate typing word by word, then add final full message
-      await animateTyping(botReply);
+      await animateTyping(botReply); // Animate text
 
       setMessages((prev) => [...prev, { sender: "bot", text: botReply }]);
       setTypingText("");
@@ -130,6 +129,7 @@ const ChatPage = () => {
       ]);
     } finally {
       setIsLoading(false);
+      setIsBotTyping(false); // Unlock UI
     }
   };
 
@@ -142,10 +142,10 @@ const ChatPage = () => {
             className={`chat-bubble ${msg.sender === "user" ? "user" : "bot"}`}
           >
             {msg.text === "..." ? (
-              <div className="loading-dots" aria-label="Bot is typing">
-                <span></span>
-                <span></span>
-                <span></span>
+              <div className="three-body" aria-label="Bot is typing">
+                <div className="three-body__dot"></div>
+                <div className="three-body__dot"></div>
+                <div className="three-body__dot"></div>
               </div>
             ) : (
               msg.text.split("\n").map((line, i) => <p key={i}>{line}</p>)
@@ -172,7 +172,7 @@ const ChatPage = () => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          disabled={isLoading}
+          disabled={isLoading || isBotTyping}
           aria-label="Chat input"
         />
         <label className="icon attach" aria-label="Attach file">
@@ -181,7 +181,7 @@ const ChatPage = () => {
             type="file"
             style={{ display: "none" }}
             onChange={(e) => console.log("File selected:", e.target.files[0])}
-            disabled={isLoading}
+            disabled={isLoading || isBotTyping}
           />
         </label>
         <Mic className="icon mic" aria-label="Voice input" />

@@ -65,6 +65,24 @@ export default function FarmerProfile() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (storedUser) {
+      setFarmerData((prev) => ({
+        ...prev,
+        name: storedUser.name || prev.name,
+        mobile: storedUser.mobile || prev.mobile,
+        state: storedUser.state || prev.state,
+        district: storedUser.district || prev.district,
+        village: storedUser.village || prev.village,
+        profileImage: storedUser.imageUrl || prev.profileImage,
+      }));
+
+      setPreview(
+        storedUser.imageUrl || storedUser.profileImage || "/farmerprofile.jpg"
+      );
+    }
+  }, []);
 
   const fileInputRef = useRef();
 
@@ -125,38 +143,48 @@ export default function FarmerProfile() {
 
       const data = await response.json();
 
-      if (response.ok) {
-        const updatedImage = data.user.imageUrl || preview;
+      if (response.ok && data.user && data.user.imageUrl) {
+        const updatedImage = data.user.imageUrl;
 
+        // Get latest user from localStorage (or create new one)
+        const existingUser = JSON.parse(localStorage.getItem("user")) || {};
+
+        // Remove previous imageUrl if it exists
+        delete existingUser.imageUrl;
+
+        // Store the new imageUrl in localStorage along with updated user details
+        const updatedUser = {
+          ...existingUser,
+          imageUrl: updatedImage,
+          name: data.user.name || existingUser.name,
+          mobile: data.user.mobile || existingUser.mobile,
+          state: data.user.state || existingUser.state,
+          district: data.user.district || existingUser.district,
+          village: data.user.village || existingUser.village,
+        };
+
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+
+        // Update state to reflect new image immediately
         setFarmerData((prev) => ({
           ...prev,
           profileImage: updatedImage,
-          name: data.user.name || prev.name,
-          state: data.user.state || prev.state,
-          district: data.user.district || prev.district,
-          village: data.user.village || prev.village,
+          name: updatedUser.name,
+          mobile: updatedUser.mobile,
+          state: updatedUser.state,
+          district: updatedUser.district,
+          village: updatedUser.village,
         }));
 
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            ...user,
-            imageUrl: updatedImage,
-            name: data.user.name || user.name,
-            state: data.user.state || user.state,
-            district: data.user.district || user.district,
-            village: data.user.village || user.village,
-          })
-        );
-
+        setPreview(updatedImage);
         setSuccess(true);
         setSelectedImage(null);
       } else {
         setErrorMsg(data.message || "Failed to update profile");
       }
     } catch (err) {
+      console.error("Upload error:", err);
       setErrorMsg("Network error: Could not update profile");
-      console.error(err);
     } finally {
       setLoading(false);
     }
