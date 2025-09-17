@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Send, Mic, AttachFile } from "@mui/icons-material";
+import { Send, Mic, AttachFile, Menu } from "@mui/icons-material";
 import "../styles/ChatPage.css";
 
 const STORAGE_KEY = "chat_messages";
+const PREV_CHATS_KEY = "previous_chats";
 const EXPIRY_DAYS = 30;
 
 const ChatPage = () => {
   const messagesEndRef = useRef(null);
   const [isBotTyping, setIsBotTyping] = useState(false);
 
-  // Load messages from localStorage with expiry check
+  // Load current chat messages from localStorage with expiry check
   const loadStoredMessages = () => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -27,34 +28,34 @@ const ChatPage = () => {
     }
   };
 
+  // Load previous chats list
+  const loadPreviousChats = () => {
+    try {
+      const stored = localStorage.getItem(PREV_CHATS_KEY);
+      if (!stored) return [];
+      return JSON.parse(stored);
+    } catch {
+      return [];
+    }
+  };
+
   const [messages, setMessages] = useState(() => {
     const loaded = loadStoredMessages();
-    if (loaded && loaded.length) return loaded;
-    return [
-      {
-        sender: "user",
-        text: "What spray should do for coconut",
-      },
-      {
-        sender: "bot",
-        text: `Okay, let's talk coconut sprays! To give you the best recommendation
-**However, here are some common sprays used for coconut trees and their general purpose:**  
-- **Neem Oil:** A good all-around organic option for controlling many pests (like mites, scales, and caterpillars) and some fungal diseases.  
-- **Bordeaux Mixture:** A classic fungicide used to prevent and control fungal diseases like bud rot and leaf spot.  
-- **Specific Insecticides/Fungicides:** If you have a specific pest or disease identified, there are many targeted chemical sprays available. **Always follow the instructions on the label carefully!**  
-`,
-      },
-    ];
+    return loaded && loaded.length ? loaded : [];
   });
+
+  const [previousChats, setPreviousChats] = useState(() => loadPreviousChats());
+
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [typingText, setTypingText] = useState(""); // for word-by-word typing animation
+  const [typingText, setTypingText] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, typingText]);
 
-  // Save messages to localStorage on every message change
+  // Save current chat messages to localStorage on every change
   useEffect(() => {
     localStorage.setItem(
       STORAGE_KEY,
@@ -62,7 +63,11 @@ const ChatPage = () => {
     );
   }, [messages]);
 
-  // Animate typing word-by-word for bot messages
+  // Save previous chats list to localStorage
+  useEffect(() => {
+    localStorage.setItem(PREV_CHATS_KEY, JSON.stringify(previousChats));
+  }, [previousChats]);
+
   const animateTyping = (fullText) => {
     setTypingText("");
     const words = fullText.split(" ");
@@ -79,6 +84,7 @@ const ChatPage = () => {
       }, 150);
     });
   };
+
   const handleSend = async () => {
     if (!input.trim() || isLoading || isBotTyping) return;
 
@@ -112,9 +118,9 @@ const ChatPage = () => {
         data.fulfillmentText || "Sorry, I didn't understand that.";
 
       setMessages((prev) => [...prev.slice(0, -1)]); // Remove loader
-      setIsBotTyping(true); // Lock UI during animation
+      setIsBotTyping(true);
 
-      await animateTyping(botReply); // Animate text
+      await animateTyping(botReply);
 
       setMessages((prev) => [...prev, { sender: "bot", text: botReply }]);
       setTypingText("");
@@ -129,70 +135,192 @@ const ChatPage = () => {
       ]);
     } finally {
       setIsLoading(false);
-      setIsBotTyping(false); // Unlock UI
+      setIsBotTyping(false);
+    }
+  };
+
+  // NEW: Save current chat and start fresh
+  const handleNewChat = () => {
+    if (messages.length === 0) return; // nothing to save
+
+    const timestamp = new Date().toISOString();
+    const title = `Chat on ${new Date().toLocaleString()}`;
+
+    const chatToSave = {
+      id: timestamp,
+      title,
+      timestamp,
+      messages,
+    };
+
+    setPreviousChats((prev) => [chatToSave, ...prev]);
+    setMessages([]);
+    setInput("");
+    setTypingText("");
+    setIsBotTyping(false);
+    setIsLoading(false);
+    setSidebarOpen(false);
+  };
+
+  // Clear current chat without saving
+  const handleClearChat = () => {
+    setMessages([]);
+    setInput("");
+    setTypingText("");
+    setIsBotTyping(false);
+    setIsLoading(false);
+  };
+
+  // Load chat from previousChats by id
+  const loadChatById = (id) => {
+    const chat = previousChats.find((c) => c.id === id);
+    if (chat) {
+      setMessages(chat.messages);
+      setInput("");
+      setTypingText("");
+      setIsBotTyping(false);
+      setIsLoading(false);
+      setSidebarOpen(false);
     }
   };
 
   return (
     <div className="chat-wrapper">
-      <div className="chat-box">
-        {messages.map((msg, index) => (
-          <div
-            key={index}
-            className={`chat-bubble ${msg.sender === "user" ? "user" : "bot"}`}
+      {/* Sidebar for previous chats */}
+      <div
+        className={`sidebar ${sidebarOpen ? "open" : ""}`}
+        aria-hidden={!sidebarOpen}
+      >
+        <div className="sidebar-header">
+          <h2>Previous Chats</h2>
+          <button
+            className="close-sidebar-btn"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close sidebar"
           >
-            {msg.text === "..." ? (
-              <div className="three-body" aria-label="Bot is typing">
-                <div className="three-body__dot"></div>
-                <div className="three-body__dot"></div>
-                <div className="three-body__dot"></div>
-              </div>
-            ) : (
-              msg.text.split("\n").map((line, i) => <p key={i}>{line}</p>)
-            )}
-          </div>
-        ))}
-
-        {/* Typing animation bubble */}
-        {typingText && (
-          <div className="chat-bubble bot" aria-label="Bot is typing">
-            {typingText.split("\n").map((line, i) => (
-              <p key={i}>{line}</p>
+            ✕
+          </button>
+        </div>
+        {previousChats.length === 0 ? (
+          <p className="no-chats">No previous chats saved.</p>
+        ) : (
+          <ul className="chat-list">
+            {previousChats.map((chat) => (
+              <li
+                key={chat.id}
+                className="chat-list-item"
+                onClick={() => loadChatById(chat.id)}
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") loadChatById(chat.id);
+                }}
+              >
+                {chat.title}
+              </li>
             ))}
-          </div>
+          </ul>
         )}
-
-        <div ref={messagesEndRef} />
       </div>
 
-      <div className="chat-input-bar">
-        <input
-          type="text"
-          placeholder="Type your farming question..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          disabled={isLoading || isBotTyping}
-          aria-label="Chat input"
-        />
-        <label className="icon attach" aria-label="Attach file">
-          <AttachFile />
+      {/* Overlay for mobile when sidebar is open */}
+      {sidebarOpen && (
+        <div
+          className="overlay"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        ></div>
+      )}
+
+      {/* Main Chat Area */}
+      <div className="chat-main">
+        <header className="chat-header">
+          <button
+            className="hamburger-btn icon"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open previous chats sidebar"
+          >
+            <Menu />
+          </button>
+
+          <div className="header-actions">
+            <button
+              onClick={handleNewChat}
+              className="action-btn"
+              aria-label="Start a new chat"
+            >
+              New Chat
+            </button>
+            <button
+              onClick={handleClearChat}
+              className="action-btn"
+              aria-label="Clear chat"
+            >
+              Clear Chat
+            </button>
+          </div>
+        </header>
+
+        <div className="chat-box" role="log" aria-live="polite">
+          {messages.map((msg, index) => (
+            <div
+              key={index}
+              className={`chat-bubble ${
+                msg.sender === "user" ? "user" : "bot"
+              }`}
+            >
+              {msg.text === "..." ? (
+                <div className="three-body" aria-label="Bot is typing">
+                  <div className="three-body__dot"></div>
+                  <div className="three-body__dot"></div>
+                  <div className="three-body__dot"></div>
+                </div>
+              ) : (
+                msg.text.split("\n").map((line, i) => <p key={i}>{line}</p>)
+              )}
+            </div>
+          ))}
+
+          {/* Typing animation bubble */}
+          {typingText && (
+            <div className="chat-bubble bot" aria-label="Bot is typing">
+              {typingText.split("\n").map((line, i) => (
+                <p key={i}>{line}</p>
+              ))}
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
+        </div>
+
+        <div className="chat-input-bar">
           <input
-            type="file"
-            style={{ display: "none" }}
-            onChange={(e) => console.log("File selected:", e.target.files[0])}
+            type="text"
+            placeholder="Type your farming question..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSend()}
             disabled={isLoading || isBotTyping}
+            aria-label="Chat input"
           />
-        </label>
-        <Mic className="icon mic" aria-label="Voice input" />
-        <button
-          onClick={handleSend}
-          className="send-btn"
-          disabled={isLoading}
-          aria-label="Send message"
-        >
-          <Send />
-        </button>
+          <label className="icon attach" aria-label="Attach file">
+            <AttachFile />
+            <input
+              type="file"
+              style={{ display: "none" }}
+              onChange={(e) => console.log("File selected:", e.target.files[0])}
+              disabled={isLoading || isBotTyping}
+            />
+          </label>
+          <Mic className="icon mic" aria-label="Voice input" />
+          <button
+            onClick={handleSend}
+            className="send-btn"
+            disabled={isLoading || isBotTyping}
+            aria-label="Send message"
+          >
+            <Send />
+          </button>
+        </div>
       </div>
     </div>
   );
