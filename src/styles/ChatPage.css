@@ -54,6 +54,30 @@ body {
   margin-right: auto;
   white-space: pre-wrap;
 }
+.chat-bubble.bot.loading {
+  font-style: italic;
+  color: #888;
+}
+
+.loading-dots::after {
+  content: " ";
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  background-color: #ccc;
+  animation: bounce 1s infinite ease-in-out;
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: scale(0.8);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
 
 /* Fixed input bar */
 .chat-input-bar {

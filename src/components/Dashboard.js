@@ -132,7 +132,7 @@ const Dashboard = () => {
           </h2>
           <p>
             <LocationOn fontSize="small" /> My Farm: {farmerData.village},
-            {farmerData.district}
+            {farmerData.district}, {farmerData.state} 
           </p>
         </div>
         <div className="date-box" style={{ fontWeight: "bold" }}>
