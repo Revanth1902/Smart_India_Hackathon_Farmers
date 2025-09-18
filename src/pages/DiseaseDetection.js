@@ -13,6 +13,7 @@ import {
   Grid,
 } from "@mui/material";
 import { styled } from "@mui/system";
+import { CircularProgress } from "@mui/material";
 
 import useLanguage from "../hooks/useLanguage"; // Your hook to get language
 
@@ -137,8 +138,13 @@ export default function DiseaseDetector() {
     }
 
     setLoading(true);
+
     try {
       const detected = await mockDetectDisease(img);
+
+      // Simulate a loader delay (2 seconds)
+      await new Promise((res) => setTimeout(res, 2000));
+
       setDisease(detected);
     } catch (e) {
       setError(
@@ -147,6 +153,7 @@ export default function DiseaseDetector() {
           : "Failed to detect disease. Try again."
       );
     }
+
     setLoading(false);
   };
 
@@ -257,6 +264,16 @@ export default function DiseaseDetector() {
                 : "Detect Disease"}
             </Button>
           </Box>
+          {loading && (
+            <Box mt={3} textAlign="center">
+              <CircularProgress color="success" />
+              <Typography variant="body2" mt={2}>
+                {language === "malayalam"
+                  ? "രോഗം പരിശോധിക്കുകയാണ്..."
+                  : "Analyzing leaf image..."}
+              </Typography>
+            </Box>
+          )}
 
           {error && (
             <Slide in direction="up" mountOnEnter unmountOnExit>
