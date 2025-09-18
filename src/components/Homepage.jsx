@@ -11,6 +11,43 @@ const ChatPage = () => {
   const [isBotTyping, setIsBotTyping] = useState(false);
 
   // Load current chat messages from localStorage with expiry check
+  // Check for browser support
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+
+  const handleVoiceInput = () => {
+    if (!recognition) {
+      alert("Speech recognition is not supported in this browser.");
+      return;
+    }
+
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.start();
+
+    recognition.onstart = () => {
+      console.log("Voice recognition started...");
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      console.log("Recognized text:", transcript);
+      setInput(transcript); // Set transcribed text into input
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error:", event.error);
+    };
+
+    recognition.onend = () => {
+      console.log("Voice recognition ended.");
+    };
+  };
+
   const loadStoredMessages = () => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -311,7 +348,12 @@ const ChatPage = () => {
               disabled={isLoading || isBotTyping}
             />
           </label>
-          <Mic className="icon mic" aria-label="Voice input" />
+          <Mic
+            className="icon mic"
+            aria-label="Voice input"
+            onClick={handleVoiceInput}
+          />
+
           <button
             onClick={handleSend}
             className="send-btn"
