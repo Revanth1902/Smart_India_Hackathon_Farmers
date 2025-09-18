@@ -301,7 +301,7 @@ const Dashboard = () => {
           style={{ cursor: "pointer", textAlign: "center" }}
         >
           <AccountCircle style={{ fontSize: 36, color: "#6d4c41" }} />
-          <p>{translations.profile[language]}</p>
+          <p>{translations.profilesing[language]}</p>
         </div>
       </div>
     </Box>

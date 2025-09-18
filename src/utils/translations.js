@@ -79,7 +79,7 @@ export const translations = {
     english: "Schemes",
     malayalam: "പദ്ധതികൾ",
   },
-  profile: {
+  profilesing: {
     english: "Profile",
     malayalam: "പ്രൊഫൈൽ",
   },
