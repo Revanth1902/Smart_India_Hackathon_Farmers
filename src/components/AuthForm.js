@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
+
 import {
   TextField,
   Button,
@@ -18,9 +19,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
-
-// JSON of state & district
-import locationData from "../India-State-District.json";
+import locationData from "../India-State-District.json"; // ⬅️ Make sure this file is correct
 
 export default function AuthForm() {
   const navigate = useNavigate();
@@ -29,16 +28,23 @@ export default function AuthForm() {
   const [otpSent, setOtpSent] = useState(false);
   const [mobile, setMobile] = useState("");
   const [name, setName] = useState("");
-  const otpInputsRef = useRef([]);
+  const [email, setEmail] = useState("");
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [selectedVillage, setSelectedVillage] = useState("");
+  const [landType, setLandType] = useState("");
+  const [farmSize, setFarmSize] = useState("");
+  const [prevCrops, setPrevCrops] = useState("");
+  const [presentCrop, setPresentCrop] = useState("");
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [testOtp, setTestOtp] = useState("");
 
   const [statesList, setStatesList] = useState([]);
   const [districtsList, setDistrictsList] = useState([]);
 
-  const [selectedState, setSelectedState] = useState("");
-  const [selectedDistrict, setSelectedDistrict] = useState("");
-  const [selectedVillage, setSelectedVillage] = useState("");
-
-  const [testOtp, setTestOtp] = useState(""); // <-- New state to store OTP for testing
+  const otpInputsRef = useRef([]);
 
   const API_BASE = "https://farmer-backend-dqit.onrender.com/api/auth";
 
@@ -47,19 +53,29 @@ export default function AuthForm() {
     setStatesList(uniqueStates);
   }, []);
 
-  const handleStateChange = (event) => {
-    const stateName = event.target.value;
-    setSelectedState(stateName);
-    setSelectedDistrict("");
-    setSelectedVillage("");
+  useEffect(() => {
+    if (tab === 1) getLocation();
+  }, [tab]);
 
-    const stateObj = locationData.find((item) => item.name === stateName);
-    setDistrictsList(stateObj ? stateObj.districts.sort() : []);
-  };
+  const getLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation is not supported by your browser");
+      return;
+    }
 
-  const handleDistrictChange = (event) => {
-    setSelectedDistrict(event.target.value);
-    setSelectedVillage("");
+    setLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLatitude(pos.coords.latitude.toFixed(6));
+        setLongitude(pos.coords.longitude.toFixed(6));
+        toast.success("Location fetched successfully.");
+        setLoading(false);
+      },
+      () => {
+        toast.error("Please allow location access to continue.");
+        setLoading(false);
+      }
+    );
   };
 
   const handleTabChange = (event, newValue) => {
@@ -67,18 +83,37 @@ export default function AuthForm() {
     setOtpSent(false);
     setMobile("");
     setName("");
+    setEmail("");
     setSelectedState("");
     setSelectedDistrict("");
     setSelectedVillage("");
+    setLandType("");
+    setFarmSize("");
+    setPrevCrops("");
+    setPresentCrop("");
+    setLatitude("");
+    setLongitude("");
     setDistrictsList([]);
     clearOtpInputs();
-    setTestOtp(""); // Reset OTP when switching tabs
+    setTestOtp("");
+  };
+
+  const handleStateChange = (event) => {
+    const state = event.target.value;
+    setSelectedState(state);
+    setSelectedDistrict("");
+    setSelectedVillage("");
+    const found = locationData.find((item) => item.name === state);
+    setDistrictsList(found ? found.districts.sort() : []);
+  };
+
+  const handleDistrictChange = (event) => {
+    setSelectedDistrict(event.target.value);
+    setSelectedVillage("");
   };
 
   const clearOtpInputs = () => {
-    otpInputsRef.current.forEach((input) => {
-      if (input) input.value = "";
-    });
+    otpInputsRef.current.forEach((input) => input && (input.value = ""));
   };
 
   const handleOtpInput = (e, index) => {
@@ -88,7 +123,7 @@ export default function AuthForm() {
       return;
     }
     if (value && index < 5) {
-      otpInputsRef.current[index + 1].focus();
+      otpInputsRef.current[index + 1]?.focus();
     }
   };
 
@@ -96,32 +131,53 @@ export default function AuthForm() {
     e.preventDefault();
 
     if (!mobile.match(/^\d{10}$/)) {
-      toast.error("Please enter a valid 10-digit mobile number.");
+      toast.error("Enter a valid 10-digit mobile number.");
       return;
     }
 
     if (tab === 1) {
-      if (!name.trim()) {
-        toast.error("Name is required for registration.");
+      if (!name.trim() || !email.trim()) {
+        toast.error("Name and Email are required.");
         return;
       }
       if (!selectedState || !selectedDistrict || !selectedVillage) {
-        toast.error("Please select State, District & Village.");
+        toast.error("Please complete location details.");
+        return;
+      }
+      if (!landType || !farmSize || !prevCrops || !presentCrop) {
+        toast.error("Please fill all farm details.");
+        return;
+      }
+      if (!latitude || !longitude) {
+        toast.error("Location not available. Please allow GPS.");
         return;
       }
     }
 
     try {
+      setLoading(true);
+
+      const cleanedPrevCrops = prevCrops
+        .split(",")
+        .map((crop) => crop.trim())
+        .filter((crop) => crop !== "")
+        .join(", ");
+
       const payload = {
         mobile,
-        ...(tab === 1
-          ? {
-              name,
-              state: selectedState,
-              district: selectedDistrict,
-              village: selectedVillage,
-            }
-          : {}),
+        ...(tab === 1 && {
+          name,
+          email,
+          state: selectedState,
+          district: selectedDistrict,
+          village: selectedVillage,
+          landType,
+          farmSize,
+          prevCrops: cleanedPrevCrops,
+          presentCrop,
+          latitude,
+          longitude,
+        }),
       };
 
       const response = await axios.post(
@@ -133,199 +189,250 @@ export default function AuthForm() {
       setOtpSent(true);
       clearOtpInputs();
 
-      // If backend sends OTP (in test mode), save it and autofill inputs
       if (response.data.otp) {
         setTestOtp(response.data.otp);
-
-        // Autofill OTP inputs with test OTP
         otpInputsRef.current.forEach((input, idx) => {
           if (input) input.value = response.data.otp[idx] || "";
         });
-      } else {
-        setTestOtp("");
       }
     } catch (error) {
-      console.error(error);
-      toast.error(
-        error?.response?.data?.message || "Failed to send OTP. Try again."
-      );
+      toast.error(error?.response?.data?.message || "Failed to send OTP.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const verifyOtp = async (e) => {
     e.preventDefault();
-    const otp = otpInputsRef.current.map((input) => input.value).join("");
+    const otp = otpInputsRef.current.map((input) => input?.value).join("");
 
     if (otp.length !== 6) {
-      toast.error("Please enter the 6-digit OTP.");
+      toast.error("Enter the 6-digit OTP.");
       return;
     }
 
     try {
-      const payload = { mobile, otp };
-      const response = await axios.post(`${API_BASE}/verify`, payload);
-
+      const response = await axios.post(`${API_BASE}/verify`, { mobile, otp });
       const { token, user } = response.data;
 
       toast.success(`${tab === 0 ? "Login" : "Registration"} successful!`);
 
-      // ✅ Set cookie for 30 days
-      Cookies.set("authToken", token, { expires: 30 }); // 30 days expiry
+      Cookies.set("authToken", token, { expires: 30 });
       Cookies.set("user", JSON.stringify(user), { expires: 30 });
-
-      // ✅ Set localStorage (with optional timestamp for manual expiry tracking)
-      const expiryDate = new Date();
-      expiryDate.setDate(expiryDate.getDate() + 30);
 
       localStorage.setItem("authToken", token);
       localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("expiry", expiryDate.toISOString());
+      localStorage.setItem(
+        "expiry",
+        new Date(Date.now() + 30 * 86400000).toISOString()
+      );
 
       navigate("/dashboard/landing");
-
-      // Reset
-      setOtpSent(false);
-      setMobile("");
-      setName("");
-      setSelectedState("");
-      setSelectedDistrict("");
-      setSelectedVillage("");
-      setDistrictsList([]);
-      clearOtpInputs();
-      setTestOtp("");
     } catch (error) {
-      console.error(error);
-      toast.error(
-        error?.response?.data?.message || "Invalid OTP. Please try again."
-      );
+      toast.error("Invalid OTP. Please try again.");
     }
   };
 
   return (
     <div className="auth-container">
       <ToastContainer position="top-center" autoClose={3000} />
-      <Paper
-        elevation={3}
-        className="auth-paper"
-        sx={{ borderRadius: "16px", padding: "2rem" }}
-      >
+      <Paper elevation={3} sx={{ borderRadius: 3, p: 4 }}>
         <Box textAlign="center" mb={2}>
           <FarmIcon fontSize="large" color="success" />
-          <Typography variant="h4" component="h1">
-            Krishi Sakhi
-          </Typography>
+          <Typography variant="h4">Krishi Sakhi</Typography>
         </Box>
 
         <Tabs
           value={tab}
           onChange={handleTabChange}
-          indicatorColor="success"
-          textColor="success"
           centered
+          textColor="success"
+          indicatorColor="success"
         >
-          <Tab
-            label="Login"
-            sx={{
-              fontWeight: tab === 0 ? "bold" : "normal",
-              color: tab === 0 ? "green" : "inherit",
-              backgroundColor:
-                tab === 0 ? "rgba(76, 175, 80, 0.1)" : "transparent",
-              borderRadius: "16px",
-              transition: "all 0.3s ease",
-            }}
-          />
-          <Tab
-            label="Register"
-            sx={{
-              fontWeight: tab === 1 ? "bold" : "normal",
-              color: tab === 1 ? "green" : "inherit",
-              backgroundColor:
-                tab === 1 ? "rgba(76, 175, 80, 0.1)" : "transparent",
-              borderRadius: "16px",
-              transition: "all 0.3s ease",
-            }}
-          />
+          <Tab label="Login" />
+          <Tab label="Register" />
         </Tabs>
 
         {!otpSent ? (
-          <form className="form-container" onSubmit={sendOtp}>
+          <form onSubmit={sendOtp}>
             {tab === 1 && (
               <>
+                {/* Full Name - Full Width */}
                 <TextField
                   label="Full Name"
-                  variant="outlined"
                   fullWidth
                   margin="normal"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
-                  sx={{ "& .MuiOutlinedInput-root": { borderRadius: "12px" } }}
                 />
 
-                <FormControl fullWidth margin="normal" required>
-                  <InputLabel id="state-select-label">State</InputLabel>
-                  <Select
-                    labelId="state-select-label"
-                    value={selectedState}
-                    label="State"
-                    onChange={handleStateChange}
-                  >
-                    {statesList.map((state) => (
-                      <MenuItem key={state} value={state}>
-                        {state}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                {/* Email & Mobile - Side by Side */}
+                <Box sx={{ display: "flex", gap: 2, flexDirection: "row" }}>
+                  <TextField
+                    label="Email"
+                    fullWidth
+                    margin="normal"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    sx={{ flex: 1 }}
+                  />
+                  <TextField
+                    label="Mobile Number"
+                    fullWidth
+                    margin="normal"
+                    value={mobile}
+                    onChange={(e) =>
+                      setMobile(e.target.value.replace(/\D/g, ""))
+                    }
+                    inputProps={{ maxLength: 10 }}
+                    required
+                    sx={{ flex: 1 }}
+                  />
+                </Box>
 
-                <FormControl
-                  fullWidth
-                  margin="normal"
-                  required
-                  disabled={!selectedState}
-                >
-                  <InputLabel id="district-select-label">District</InputLabel>
-                  <Select
-                    labelId="district-select-label"
-                    value={selectedDistrict}
-                    label="District"
-                    onChange={handleDistrictChange}
+                {/* State & District - Side by Side */}
+                <Box sx={{ display: "flex", gap: 2, flexDirection: "row" }}>
+                  <FormControl
+                    fullWidth
+                    margin="normal"
+                    required
+                    sx={{ flex: 1 }}
                   >
-                    {districtsList.map((district) => (
-                      <MenuItem key={district} value={district}>
-                        {district}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                    <InputLabel>State</InputLabel>
+                    <Select
+                      value={selectedState}
+                      onChange={handleStateChange}
+                      label="State"
+                    >
+                      {statesList.map((state) => (
+                        <MenuItem key={state} value={state}>
+                          {state}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
 
+                  <FormControl
+                    fullWidth
+                    margin="normal"
+                    required
+                    disabled={!selectedState}
+                    sx={{ flex: 1 }}
+                  >
+                    <InputLabel>District</InputLabel>
+                    <Select
+                      value={selectedDistrict}
+                      onChange={handleDistrictChange}
+                      label="District"
+                    >
+                      {districtsList.map((district) => (
+                        <MenuItem key={district} value={district}>
+                          {district}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
+
+                {/* Village - Full Width */}
                 <TextField
                   label="Village"
-                  variant="outlined"
                   fullWidth
                   margin="normal"
                   value={selectedVillage}
                   onChange={(e) => setSelectedVillage(e.target.value)}
                   required
-                  disabled={!selectedDistrict}
-                  sx={{
-                    "& .MuiOutlinedInput-root": { borderRadius: "12px" },
-                  }}
                 />
+
+                {/* Land Type & Farm Size - Side by Side */}
+                <Box sx={{ display: "flex", gap: 2, flexDirection: "row" }}>
+                  <FormControl
+                    fullWidth
+                    margin="normal"
+                    required
+                    sx={{ flex: 1 }}
+                  >
+                    <InputLabel>Land Type</InputLabel>
+                    <Select
+                      value={landType}
+                      onChange={(e) => setLandType(e.target.value)}
+                      label="Land Type"
+                    >
+                      <MenuItem value="Owned">Owned</MenuItem>
+                      <MenuItem value="Leased">Leased</MenuItem>
+                      <MenuItem value="Rented">Rented</MenuItem>
+                    </Select>
+                  </FormControl>
+
+                  <TextField
+                    label="Farm Size (acres)"
+                    fullWidth
+                    margin="normal"
+                    value={farmSize}
+                    onChange={(e) => setFarmSize(e.target.value)}
+                    required
+                    sx={{ flex: 1 }}
+                  />
+                </Box>
+
+                {/* Crops grown in last 5 years - Full Width */}
+                <TextField
+                  label="Crops grown in last 5 years"
+                  fullWidth
+                  margin="normal"
+                  value={prevCrops}
+                  onChange={(e) => setPrevCrops(e.target.value)}
+                  required
+                />
+
+                {/* Present Crop - Full Width */}
+                <TextField
+                  label="Present Crop"
+                  fullWidth
+                  margin="normal"
+                  value={presentCrop}
+                  onChange={(e) => setPresentCrop(e.target.value)}
+                  required
+                />
+
+                {/* Latitude & Longitude - Side by Side */}
+                <Box sx={{ display: "flex", gap: 2, flexDirection: "row" }}>
+                  <TextField
+                    label="Latitude"
+                    fullWidth
+                    margin="normal"
+                    value={latitude}
+                    InputProps={{ readOnly: true }}
+                    required
+                    sx={{ flex: 1 }}
+                  />
+                  <TextField
+                    label="Longitude"
+                    fullWidth
+                    margin="normal"
+                    value={longitude}
+                    InputProps={{ readOnly: true }}
+                    required
+                    sx={{ flex: 1 }}
+                  />
+                </Box>
               </>
             )}
 
-            <TextField
-              label="Mobile Number"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              value={mobile}
-              onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
-              inputProps={{ maxLength: 10 }}
-              required
-              sx={{ "& .MuiOutlinedInput-root": { borderRadius: "12px" } }}
-            />
+            {/* If tab is Login (0), just Mobile Number full width */}
+            {tab === 0 && (
+              <TextField
+                label="Mobile Number"
+                fullWidth
+                margin="normal"
+                value={mobile}
+                onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
+                inputProps={{ maxLength: 10 }}
+                required
+              />
+            )}
 
             <Button
               type="submit"
@@ -333,17 +440,17 @@ export default function AuthForm() {
               color="success"
               fullWidth
               sx={{ mt: 2 }}
+              disabled={loading}
             >
-              Send OTP
+              {loading ? "Processing..." : "Send OTP"}
             </Button>
           </form>
         ) : (
-          <form className="form-container" onSubmit={verifyOtp}>
-            <Typography variant="subtitle1" align="center" gutterBottom>
-              Enter the 6-digit OTP sent to your mobile
+          <form onSubmit={verifyOtp}>
+            <Typography align="center" mt={2} mb={1}>
+              Enter the 6-digit OTP
             </Typography>
-
-            <Box display="flex" justifyContent="center" gap={2}>
+            <Box display="flex" justifyContent="center" gap={1} mb={2}>
               {[0, 1, 2, 3, 4, 5].map((i) => (
                 <TextField
                   key={i}
@@ -353,40 +460,25 @@ export default function AuthForm() {
                     maxLength: 1,
                     style: { textAlign: "center", fontSize: "20px" },
                   }}
-                  sx={{ width: "60px" }}
+                  sx={{ width: "45px" }}
                 />
               ))}
             </Box>
-
-            {/* Display the OTP in test mode */}
             {testOtp && (
-              <Typography
-                variant="body2"
-                align="center"
-                color="textSecondary"
-                sx={{ mt: 2, fontWeight: "bold" }}
-              >
-                🔑 Test OTP: {testOtp}
+              <Typography align="center" color="textSecondary">
+                🔐 Test OTP: <strong>{testOtp}</strong>
               </Typography>
             )}
-
-            <Button
-              type="submit"
-              variant="contained"
-              color="success"
-              fullWidth
-              sx={{ mt: 3 }}
-            >
+            <Button type="submit" variant="contained" color="success" fullWidth>
               Verify OTP
             </Button>
             <Button
               variant="text"
               fullWidth
-              sx={{ mt: 1 }}
               onClick={() => {
                 setOtpSent(false);
                 clearOtpInputs();
-                setTestOtp(""); // Reset OTP when going back
+                setTestOtp("");
               }}
             >
               Go Back
