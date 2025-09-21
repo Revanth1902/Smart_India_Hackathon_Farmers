@@ -276,7 +276,7 @@ export default function DiseaseDetector() {
           )}
 
           {error && (
-            <Slide in direction="up" mountOnEnter unmountOnExit>
+            <Slide in direction="up" mountOnEnter unmountOnExit>  
               <Alert severity="error" sx={{ mt: 3 }}>
                 {error}
               </Alert>

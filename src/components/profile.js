@@ -27,19 +27,21 @@ import useLanguage from "../hooks/useLanguage";
 import { translations } from "../utils/translations";
 
 // Load user from localStorage
-const user = JSON.parse(localStorage.getItem("user")) || {};
+// Read from localStorage and parse JSON
+const storedUser = JSON.parse(localStorage.getItem("user")) || {};
 
 const initialFarmerData = {
-  name: user.name || "Ravi Kumar",
-  mobile: user.mobile || "+91 98765 43210",
-  state: user.state || "Kerala",
-  district: user.district || "Thrissur",
-  village: user.village || "Thrissur",
-  email: "ravi.kumar@example.com",
-  landType: "Wetland",
-  farmSize: "2.5 acres",
-  crops: ["Rice", "Banana", "Coconut"],
-  profileImage: user.imageUrl || "/farmerprofile.jpg",
+  name: storedUser.name || "Default Name",
+  mobile: storedUser.mobile || "+91 XXXXXX",
+  state: storedUser.state || "Unknown",
+  district: storedUser.district || "Unknown",
+  village: storedUser.village || "Unknown",
+  landType: storedUser.landType || "Unknown",
+  farmSize: storedUser.farmSize || "0",
+  profileImage: storedUser.imageUrl || "/fallback.png",
+  crops: (storedUser.prevCrops?.split(", ") || []).concat(
+    storedUser.presentCrop ? [storedUser.presentCrop] : []
+  ),
 };
 
 const cropHistory = [
