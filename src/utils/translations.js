@@ -55,6 +55,14 @@ export const translations = {
     english: "Chat with AI farming assistant",
     malayalam: "AI കർഷക സഹായി കൂടെ ചാറ്റ് ചെയ്യുക",
   },
+  landLease: {
+    english: "Land Lease",
+    malayalam: "ഭൂമിയുടെ വാടക",
+  },
+  landLeaseDesc: {
+    english: "Find or offer agricultural land for lease.",
+    malayalam: "ഭൂമി വാടകയ്‌ക്ക് നൽകുക അല്ലെങ്കിൽ കണ്ടെത്തുക.",
+  },
   recentActivity: {
     english: "Recent Activity",
     malayalam: "സമീപകാല പ്രവർത്തനങ്ങൾ",

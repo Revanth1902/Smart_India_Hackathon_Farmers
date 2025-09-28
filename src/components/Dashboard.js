@@ -13,6 +13,8 @@ import {
   Description,
   AccountCircle,
 } from "@mui/icons-material";
+import AgricultureIcon from "@mui/icons-material/Agriculture";
+
 import { useNavigate } from "react-router-dom";
 import useLanguage from "../hooks/useLanguage";
 import { translations } from "../utils/translations"; // adjust path accordingly
@@ -223,7 +225,7 @@ const Dashboard = () => {
             className="action-card diagnose-action"
             onClick={() => navigate("/dashboard/diagnose")}
           >
-            <CameraAlt fontSize="large" style={{ color: "#00796b" }} />
+            <CameraAlt fontSize="large" style={{ color: "#6a1b9a" }} />
             <strong>{translations.diagnosePlant[language]}</strong>
             <p>{translations.diagnoseDesc[language]}</p>
           </div>
@@ -234,6 +236,14 @@ const Dashboard = () => {
             <Chat fontSize="large" style={{ color: "#6a1b9a" }} />
             <strong>{translations.askBot[language]}</strong>
             <p>{translations.askBotDesc[language]}</p>
+          </div>
+          <div
+            className="action-card landlease-action"
+            onClick={() => navigate("/dashboard/land-lease")}
+          >
+            <AgricultureIcon fontSize="large" style={{ color: "#6a1b9a" }} />
+            <strong>{translations.landLease[language]}</strong>
+            <p>{translations.landLeaseDesc[language]}</p>
           </div>
         </div>
       </section>

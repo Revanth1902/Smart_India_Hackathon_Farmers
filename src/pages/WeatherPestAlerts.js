@@ -32,8 +32,7 @@ const getWeatherAlert = () => {
       level: "info",
       messages: {
         english: "Morning dew might increase mildew risk. Dry leaves early.",
-        malayalam:
-          "പുലർച്ചെ പെയ്ത്ത് മിൽഡ്യൂ രോഗ സാധ്യത ഉയർത്തുന്നു. ഇലകൾ ഉണക്കുക.",
+        malayalam: "പുലർച്ചെ പെയ്ത്ത് മിൽഡ്യൂ സാധ്യത. ഇലകൾ ഉണക്കുക.",
       },
     };
   if (hour >= 12 && hour < 16)
@@ -42,7 +41,7 @@ const getWeatherAlert = () => {
       level: "warning",
       messages: {
         english: "High afternoon temperatures. Ensure proper irrigation.",
-        malayalam: "ഉച്ച വേളയിൽ ചൂട് കൂടും. നന്നായി വെള്ളം കൊടുക്കുക.",
+        malayalam: "ഉച്ച ചൂട് കൂടും. വെള്ളം നന്നായി കൊടുക്കുക.",
       },
     };
   if (hour >= 16 && hour < 20)
@@ -79,15 +78,14 @@ const getPestAlert = () => {
       level: "info",
       messages: {
         english: "Low pest pressure today — no action needed.",
-        malayalam: "ഇന്ന് കീടസംക്രമം കുറവാണ് — പ്രത്യേക നടപടിയില്ല.",
+        malayalam: "ഇന്ന് കീടസംക്രമം കുറവാണ് — നടപടിയില്ല.",
       },
     },
     {
       level: "critical",
       messages: {
         english: "Fungal spores detected — apply fungicide if needed.",
-        malayalam:
-          "ഫംഗൽ സ്പോർസ് കണ്ടെത്തിയിട്ടുണ്ട് — ആവശ്യമെങ്കിൽ ഫംഗിസൈഡ് ഉപയോഗിക്കുക.",
+        malayalam: "ഫംഗൽ സ്പോർസ് കണ്ടെത്തിയിട്ടുണ്ട് — ഫംഗിസൈഡ് ഉപയോഗിക്കുക.",
       },
     },
     {
@@ -106,6 +104,94 @@ const getPestAlert = () => {
   };
 };
 
+// --- Loan Alert Logic ---
+const getLoanAlerts = (loans) => {
+  const today = new Date();
+  const alerts = [];
+
+  for (const loan of loans) {
+    const dueDate = new Date(loan.next_payment_due_date);
+    const diffInDays = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+
+    if (diffInDays >= 0 && diffInDays <= 10) {
+      alerts.push({
+        type: "Loan",
+        level: "warning",
+        messages: {
+          english: `Loan payment for "${
+            loan.loan_purpose
+          }" of ₹${loan.emi_installment_amount.toFixed(
+            2
+          )} is due in ${diffInDays} day(s).`,
+          malayalam: `"${
+            loan.loan_purpose
+          }" ലോണിന് ₹${loan.emi_installment_amount.toFixed(
+            2
+          )} അടവ് ${diffInDays} ദിവസത്തിനുള്ളിൽ നല്‍കണം.`,
+        },
+      });
+    }
+  }
+
+  return alerts;
+};
+
+// --- Sample Loan Data ---
+// --- Sample Loan Data (Updated with upcoming dues) ---
+const initialLoans = [
+  {
+    loan_id: "FCL-00142",
+    farmer_name: "Priya Sharma",
+    loan_purpose: "Crop Production (Wheat)",
+    loan_amount: 150000,
+    loan_currency: "INR",
+    loan_date_taken: "2024-06-10",
+    interest_rate_pa: 4.0,
+    loan_term_years: 1.5,
+    repayment_frequency: "Monthly",
+    emi_installment_amount: 8658.74,
+    monthly_due_date: 5,
+    total_payments_made: 3,
+    total_amount_paid: 25976.22,
+    principal_outstanding: 125830.4,
+    next_payment_due_date: "2025-10-03", // in 5 days
+  },
+  {
+    loan_id: "FEL-00305",
+    farmer_name: "Rajeev Singh",
+    loan_purpose: "Equipment Purchase (Tractor)",
+    loan_amount: 750000,
+    loan_currency: "INR",
+    loan_date_taken: "2023-11-25",
+    interest_rate_pa: 8.5,
+    loan_term_years: 5,
+    repayment_frequency: "Monthly",
+    emi_installment_amount: 15447.88,
+    monthly_due_date: 28,
+    total_payments_made: 10,
+    total_amount_paid: 154478.8,
+    principal_outstanding: 631908.5,
+    next_payment_due_date: "2025-10-07", // in 9 days
+  },
+  {
+    loan_id: "FCL-00199",
+    farmer_name: "Anita Kumar",
+    loan_purpose: "Dairy Expansion",
+    loan_amount: 50000,
+    loan_currency: "INR",
+    loan_date_taken: "2025-06-20",
+    interest_rate_pa: 6.5,
+    loan_term_years: 2,
+    repayment_frequency: "Monthly",
+    emi_installment_amount: 2123.67,
+    monthly_due_date: 15,
+    total_payments_made: 2,
+    total_amount_paid: 4247.34,
+    principal_outstanding: 45752.66,
+    next_payment_due_date: "2025-10-10", // in 12 days (will still show if limit is 30)
+  },
+];
+
 // --- Main Component ---
 const WeatherPestAlertsPage = () => {
   const language = useLanguage();
@@ -116,14 +202,15 @@ const WeatherPestAlertsPage = () => {
     setTimeout(() => {
       const weather = getWeatherAlert();
       const pest = getPestAlert();
-      setAlerts([weather, pest]);
+      const loanAlerts = getLoanAlerts(initialLoans);
+      setAlerts([weather, pest, ...loanAlerts]);
       setLoading(false);
     }, 1000);
   }, []);
 
   const titleText = {
-    english: "Weather & Pest Alerts",
-    malayalam: "കാലാവസ്ഥയും കീടങ്ങളും സംബന്ധിച്ച മുന്നറിയിപ്പുകൾ",
+    english: "Weather, Pest & Loan Alerts",
+    malayalam: "കാലാവസ്ഥ, കീടം, ലോൺ മുന്നറിയിപ്പുകൾ",
   };
 
   return (
@@ -169,8 +256,13 @@ const WeatherPestAlertsPage = () => {
                       : "primary.main"
                   }
                 >
-                  {alert.type}{" "}
-                  {language === "malayalam" ? "മുന്നറിയിപ്പ്" : "Alert"}
+                  {alert.type === "Loan"
+                    ? language === "malayalam"
+                      ? "ലോൺ അടവ് മുന്നറിയിപ്പ്"
+                      : "Loan Payment Alert"
+                    : `${alert.type} ${
+                        language === "malayalam" ? "മുന്നറിയിപ്പ്" : "Alert"
+                      }`}
                 </Typography>
                 <Typography>{alert.messages[language]}</Typography>
               </CardContent>

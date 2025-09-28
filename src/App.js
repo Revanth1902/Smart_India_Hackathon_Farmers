@@ -12,6 +12,7 @@ import Cookies from "js-cookie";
 
 // Components
 import AuthWithOTP from "./components/AuthForm";
+import LandLeasePlatform from "./pages/LandLeasePlatfrom";
 import FarmerProfile from "./components/profile";
 import Home from "./components/Homepage";
 import LandingPage from "./components/Dashboard";
@@ -111,6 +112,10 @@ const App = () => {
                       <Route path="marketprice" element={<MarketPrices />} />
                       <Route path="schemes" element={<Schemes />} />
                       <Route path="profile" element={<FarmerProfile />} />
+                      <Route
+                        path="land-lease"
+                        element={<LandLeasePlatform />}
+                      />
                     </Routes>
                   </Box>
                   {/* <VoiceAssistantButton />
