@@ -158,6 +158,7 @@ export default function FarmerProfile() {
     setLoading(true);
     try {
       const body = {
+        mobile: farmerData.mobile,
         name: editedData.name,
         state: editedData.state,
         district: editedData.district,
