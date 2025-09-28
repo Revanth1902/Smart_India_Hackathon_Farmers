@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // Utility
 const DAYS_TO_MS = 1000 * 60 * 60 * 24 * 30;
@@ -103,6 +104,8 @@ const dummyLeases = [
   },
 ];
 const LandLeasePlatform = () => {
+  const navigate = useNavigate();
+
   const [leases, setLeases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -214,8 +217,11 @@ const LandLeasePlatform = () => {
           <option value="size-high">Size: Large to Small</option>
         </select>
 
-        <button style={styles.addBtn} onClick={() => setShowForm(true)}>
-          ➕ Add Land Lease
+        <button
+          style={styles.addBtn}
+          onClick={() => navigate("/dashboard/manage-lease")}
+        >
+          Manage Land Leases
         </button>
       </div>
 
@@ -268,77 +274,6 @@ const LandLeasePlatform = () => {
                 <p>
                   <strong>Contact:</strong> 📞 {selectedLease.contact}
                 </p>
-              </div>
-            </div>
-          )}
-
-          {/* Add Lease Form */}
-          {showForm && (
-            <div style={styles.modalOverlay}>
-              <div style={styles.modal}>
-                <button
-                  style={styles.closeBtn}
-                  onClick={() => setShowForm(false)}
-                >
-                  ✖
-                </button>
-                <h2 style={{ marginBottom: 15 }}>Add Land Lease</h2>
-                <form style={styles.form} onSubmit={handleAddLease}>
-                  <input
-                    type="text"
-                    placeholder="Location"
-                    value={form.location}
-                    required
-                    onChange={(e) =>
-                      setForm({ ...form, location: e.target.value })
-                    }
-                    style={styles.input}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Price (e.g., ₹10,000 / year)"
-                    value={form.price}
-                    required
-                    onChange={(e) =>
-                      setForm({ ...form, price: e.target.value })
-                    }
-                    style={styles.input}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Size (e.g., 2 acres)"
-                    value={form.size}
-                    required
-                    onChange={(e) => setForm({ ...form, size: e.target.value })}
-                    style={styles.input}
-                  />
-                  <input
-                    type="tel"
-                    placeholder="Contact Number"
-                    value={form.contact}
-                    required
-                    onChange={(e) =>
-                      setForm({ ...form, contact: e.target.value })
-                    }
-                    style={styles.input}
-                  />
-                  <textarea
-                    placeholder="Short Description"
-                    value={form.description}
-                    required
-                    onChange={(e) =>
-                      setForm({ ...form, description: e.target.value })
-                    }
-                    style={{
-                      ...styles.input,
-                      height: "80px",
-                      resize: "vertical",
-                    }}
-                  />
-                  <button type="submit" style={styles.submitBtn}>
-                    ✅ Submit
-                  </button>
-                </form>
               </div>
             </div>
           )}

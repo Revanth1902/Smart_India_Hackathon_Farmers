@@ -13,6 +13,7 @@ import Cookies from "js-cookie";
 // Components
 import AuthWithOTP from "./components/AuthForm";
 import LandLeasePlatform from "./pages/LandLeasePlatfrom";
+import ManageLands from "./pages/manageLands";
 import FarmerProfile from "./components/profile";
 import Home from "./components/Homepage";
 import LandingPage from "./components/Dashboard";
@@ -30,6 +31,8 @@ import Homepage from "./components/Homepage";
 import WeatherPage from "./pages/Weather";
 import MarketPrices from "./pages/MarketPrices";
 import Schemes from "./pages/Schemes";
+import MarketList from "./pages/markets";
+import Loans from "./components/Loans";
 
 const theme = createTheme({
   palette: {
@@ -112,10 +115,13 @@ const App = () => {
                       <Route path="marketprice" element={<MarketPrices />} />
                       <Route path="schemes" element={<Schemes />} />
                       <Route path="profile" element={<FarmerProfile />} />
+                      <Route path="loans" element={<Loans />} />
                       <Route
                         path="land-lease"
                         element={<LandLeasePlatform />}
                       />
+                      <Route path="manage-lease" element={<ManageLands />} />
+                      <Route path="markets" element={<MarketList />} />
                     </Routes>
                   </Box>
                   {/* <VoiceAssistantButton />

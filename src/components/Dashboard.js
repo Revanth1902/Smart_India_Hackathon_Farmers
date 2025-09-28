@@ -403,7 +403,7 @@ const Dashboard = () => {
 
         <div
           className="card"
-          onClick={() => navigate("/dashboard/marketprice")}
+          onClick={() => navigate("/dashboard/markets")}
           style={{ cursor: "pointer", textAlign: "center" }}
         >
           <ShowChart style={{ fontSize: 36, color: "#388e3c" }} />
