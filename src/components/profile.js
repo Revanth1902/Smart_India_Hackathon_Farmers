@@ -154,6 +154,7 @@ export default function FarmerProfile() {
   };
 
   // Save other profile info (without image)
+  // Save other profile info (without image)
   const handleSave = async () => {
     setLoading(true);
     try {
@@ -165,7 +166,6 @@ export default function FarmerProfile() {
         village: editedData.village,
         landType: editedData.landType,
         farmSize: editedData.farmSize,
-        // You can add prevCrops and presentCrop if you want to allow editing here too
       };
 
       const res = await fetch(
@@ -174,7 +174,6 @@ export default function FarmerProfile() {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(body),
         }
@@ -186,11 +185,17 @@ export default function FarmerProfile() {
         throw new Error(data.message || "Failed to update profile");
       }
 
+      // Safely rebuild the crops array
+      const rebuiltCrops = (data.user.prevCrops?.split(", ") || []).concat(
+        data.user.presentCrop ? [data.user.presentCrop] : []
+      );
+
       // Update localStorage and state
       const updatedUser = {
         ...storedUser,
         ...data.user,
         imageUrl: data.user.imageUrl || storedUser.imageUrl,
+        crops: rebuiltCrops,
       };
 
       localStorage.setItem("user", JSON.stringify(updatedUser));
