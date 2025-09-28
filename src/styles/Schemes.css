@@ -17,6 +17,17 @@
   margin: 0;
   font-size: 14px;
 }
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  background-color: #e0ffe0;
+  padding: 12px 16px;
+  border-radius: 20px;
+  align-items: center;
+  justify-content: center;
+}
 
 .container {
   max-width: 800px;
