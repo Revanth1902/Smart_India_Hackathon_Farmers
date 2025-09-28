@@ -11,6 +11,7 @@ import Box from "@mui/material/Box";
 import Cookies from "js-cookie";
 
 // Components
+import AlertsDetailPage from "./pages/AlertsDetailPage";
 import AuthWithOTP from "./components/AuthForm";
 import LandLeasePlatform from "./pages/LandLeasePlatfrom";
 import ManageLands from "./pages/manageLands";
@@ -122,6 +123,10 @@ const App = () => {
                       />
                       <Route path="manage-lease" element={<ManageLands />} />
                       <Route path="markets" element={<MarketList />} />
+                      <Route
+                        path="/alerts/:type"
+                        element={<AlertsDetailPage />}
+                      />
                     </Routes>
                   </Box>
                   {/* <VoiceAssistantButton />

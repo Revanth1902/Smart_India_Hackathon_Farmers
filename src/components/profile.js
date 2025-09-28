@@ -377,7 +377,7 @@ export default function FarmerProfile() {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleEditClose} disabled={loading}>
+          <Button variant="contained" color="primary" onClick={handleEditClose}>
             Cancel
           </Button>
           <Button

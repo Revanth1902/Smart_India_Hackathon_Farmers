@@ -221,7 +221,7 @@ const LandLeasePlatform = () => {
           style={styles.addBtn}
           onClick={() => navigate("/dashboard/manage-lease")}
         >
-          Manage Land Leases
+          Lease my land
         </button>
       </div>
 
