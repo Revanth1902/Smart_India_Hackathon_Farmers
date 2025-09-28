@@ -16,6 +16,34 @@ const Loader = () => (
   </div>
 );
 
+// Map Open-Meteo weather codes to descriptions
+const getWeatherDescription = (code) => {
+  const map = {
+    0: "Clear sky",
+    1: "Mainly clear",
+    2: "Partly cloudy",
+    3: "Overcast",
+    45: "Fog",
+    48: "Depositing rime fog",
+    51: "Light drizzle",
+    53: "Moderate drizzle",
+    55: "Dense drizzle",
+    61: "Light rain",
+    63: "Moderate rain",
+    65: "Heavy rain",
+    71: "Light snow",
+    73: "Moderate snow",
+    75: "Heavy snow",
+    80: "Rain showers",
+    81: "Moderate rain showers",
+    82: "Violent rain showers",
+    95: "Thunderstorm",
+    96: "Thunderstorm with slight hail",
+    99: "Thunderstorm with heavy hail",
+  };
+  return map[code] || "Unknown";
+};
+
 const WeatherPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -26,50 +54,69 @@ const WeatherPage = () => {
   });
   const [forecast, setForecast] = useState([]);
 
+  // Get user from localStorage
+  let user = null;
+  try {
+    user = JSON.parse(localStorage.getItem("user"));
+  } catch {
+    user = null;
+  }
+
+  const latitude = parseFloat(user?.latitude) || 17.737318;
+  const longitude = parseFloat(user?.longitude) || 83.296256;
+  const locationName = user?.village || "Your Location";
+
   useEffect(() => {
-    fetch("https://wttr.in/Kerala?format=j1")
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=relative_humidity_2m,precipitation&daily=temperature_2m_max,precipitation_sum,weathercode&timezone=auto`;
+
+    setLoading(true);
+    fetch(url)
       .then((res) => res.json())
       .then((data) => {
-        const currentCondition = data.current_condition[0];
+        if (!data.current_weather) {
+          setError("Weather data not available.");
+          setLoading(false);
+          return;
+        }
+
         setCurrent({
-          temperature: `${currentCondition.temp_C}°C`,
-          humidity: `${currentCondition.humidity}%`,
-          rainfall: data.weather[0].hourly[0].chanceofrain + " mm",
+          temperature: `${data.current_weather.temperature}°C`,
+          humidity: data.hourly.relative_humidity_2m
+            ? `${data.hourly.relative_humidity_2m[0]}%`
+            : "--",
+          rainfall: data.hourly.precipitation
+            ? `${data.hourly.precipitation[0]} mm`
+            : "--",
         });
 
-        const forecastData = data.weather.slice(0, 3).map((day) => {
-          const date = new Date(day.date);
-          const formattedDate = date.toLocaleDateString("en-IN", {
+        const forecastData = data.daily.time.slice(0, 3).map((date, index) => ({
+          date: new Date(date).toLocaleDateString("en-IN", {
             day: "2-digit",
             month: "short",
             year: "numeric",
-          });
+          }),
+          temp: `${data.daily.temperature_2m_max[index]}°C`,
+          condition: getWeatherDescription(data.daily.weathercode[index]),
+          rainfall: data.daily.precipitation_sum[index],
+        }));
 
-          const midday =
-            day.hourly.find((h) => h.time === "1200") || day.hourly[0];
-          return {
-            date: formattedDate,
-            temp: `${midday.tempC}°C`,
-            condition: midday.weatherDesc[0].value,
-          };
-        });
         setForecast(forecastData);
-
-        setLoading(false);
         setError(null);
+        setLoading(false);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error(err);
         setError("Failed to fetch weather data.");
         setLoading(false);
       });
-  }, []);
+  }, [latitude, longitude]);
 
   return (
     <div className="weather-container">
       {/* Weather Card */}
       <div className="weather-card">
         <h3 className="card-title">
-          <Thunderstorm fontSize="small" /> Weather Forecast - Kerala
+          <Thunderstorm fontSize="small" /> Weather Forecast - {locationName}
         </h3>
         <p className="card-sub">
           Current weather conditions and 3-day forecast
@@ -122,7 +169,7 @@ const WeatherPage = () => {
 
             <div className="alert">
               <WarningAmber style={{ marginRight: "8px" }} />
-              {forecast.some((d) => d.condition.toLowerCase().includes("rain"))
+              {forecast.some((d) => d.rainfall > 0)
                 ? "Heavy rain expected today. Take precautions for your crops."
                 : "No severe weather alerts."}
             </div>

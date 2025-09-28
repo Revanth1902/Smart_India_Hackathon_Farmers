@@ -153,36 +153,57 @@
   margin-top: 4px;
   opacity: 0.9;
 }
-
-/* Recent Activity */
+/* Recent Chat Card */
 .recent-card {
-  background: rgba(255, 255, 255, 0.11);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.1),
-    inset 0 0 6px 3px rgba(255, 255, 255, 0.3);
+  background-color: #fff;
   border-radius: 12px;
-  padding: 2px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 32px;
+  max-width: 100%;
+  width: 100%;
 }
 
+/* Subtitle Text */
 .recent-sub {
-  font-size: 13px;
-  color: black;
-  margin: 4px 0 16px;
+  color: #666;
+  font-size: 0.95rem;
+  margin-top: 4px;
+  margin-bottom: 16px;
 }
 
+/* When there are no chats */
 .recent-empty {
   text-align: center;
-  padding: 30px 10px;
-  color: whitesmoke !important;
+  padding: 40px;
+  color: #bbb;
+  font-style: italic;
+  background-color: #fafafa;
+  border: 1px dashed #ccc;
+  border-radius: 8px;
 }
-.recent-empty p {
-  margin: 4px 0;
+
+/* Recent Chat List */
+.recent-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Individual Chat Item */
+.recent-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-radius: 6px;
+}
+
+.recent-item:hover {
+  background-color: #f3e5f5;
+  color: #4a148c;
 }
 
 /* Footer */

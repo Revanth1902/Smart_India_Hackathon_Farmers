@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Send, Mic, AttachFile, Menu } from "@mui/icons-material";
 import "../styles/ChatPage.css";
+import { useLocation } from "react-router-dom";
 
 const STORAGE_KEY = "chat_messages";
 const PREV_CHATS_KEY = "previous_chats";
 const EXPIRY_DAYS = 30;
 
 const ChatPage = () => {
+  const location = useLocation();
+
   const messagesEndRef = useRef(null);
   const [isBotTyping, setIsBotTyping] = useState(false);
 
@@ -175,13 +178,43 @@ const ChatPage = () => {
       setIsBotTyping(false);
     }
   };
+  const generateChatTitle = (messages) => {
+    if (!messages || messages.length === 0) return "Untitled Chat";
+
+    const userMessages = messages
+      .filter((msg) => msg.sender === "user")
+      .map((msg) => msg.text.toLowerCase());
+
+    const fullText = userMessages.join(" ");
+
+    // Basic keyword matching – you can expand this!
+    if (fullText.includes("wheat") && fullText.includes("disease"))
+      return "Chat about Wheat Diseases";
+    if (fullText.includes("pesticide") || fullText.includes("insect"))
+      return "Pesticide Information";
+    if (fullText.includes("fertilizer") || fullText.includes("compost"))
+      return "Fertilizer & Soil Advice";
+    if (fullText.includes("price") || fullText.includes("market"))
+      return "Market Price Inquiry";
+    if (fullText.includes("irrigation") || fullText.includes("water"))
+      return "Irrigation Information";
+    if (fullText.includes("weather") || fullText.includes("rain"))
+      return "Weather Advice for Crops";
+    if (fullText.includes("rice") || fullText.includes("paddy"))
+      return "Discussion on Rice Cultivation";
+    if (fullText.includes("organic") || fullText.includes("natural"))
+      return "Organic Farming Tips";
+
+    // Fallback: use first user message
+    return `Chat: ${userMessages[0].slice(0, 30)}...`;
+  };
 
   // NEW: Save current chat and start fresh
   const handleNewChat = () => {
     if (messages.length === 0) return; // nothing to save
 
     const timestamp = new Date().toISOString();
-    const title = `Chat on ${new Date().toLocaleString()}`;
+    const title = generateChatTitle(messages);
 
     const chatToSave = {
       id: timestamp,
@@ -220,7 +253,18 @@ const ChatPage = () => {
       setSidebarOpen(false);
     }
   };
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const chatIdFromUrl = queryParams.get("chatId");
 
+    if (chatIdFromUrl && previousChats.length > 0) {
+      const foundChat = previousChats.find((c) => c.id === chatIdFromUrl);
+      if (foundChat) {
+        setMessages(foundChat.messages);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.search, previousChats]);
   return (
     <div className="chat-wrapper">
       {/* Sidebar for previous chats */}

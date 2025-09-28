@@ -20,8 +20,49 @@ import useLanguage from "../hooks/useLanguage";
 import { translations } from "../utils/translations"; // adjust path accordingly
 import "../styles/Dashboard.css";
 
+// Map Open-Meteo weather codes to descriptions
+const getWeatherDescription = (code) => {
+  const map = {
+    0: "Clear sky",
+    1: "Mainly clear",
+    2: "Partly cloudy",
+    3: "Overcast",
+    45: "Fog",
+    48: "Depositing rime fog",
+    51: "Light drizzle",
+    53: "Moderate drizzle",
+    55: "Dense drizzle",
+    61: "Light rain",
+    63: "Moderate rain",
+    65: "Heavy rain",
+    71: "Light snow",
+    73: "Moderate snow",
+    75: "Heavy snow",
+    80: "Rain showers",
+    81: "Moderate rain showers",
+    82: "Violent rain showers",
+    95: "Thunderstorm",
+    96: "Thunderstorm with slight hail",
+    99: "Thunderstorm with heavy hail",
+  };
+  return map[code] || "Unknown";
+};
+
 const Dashboard = () => {
   const language = useLanguage();
+  const [previousChats, setPreviousChats] = useState([]);
+
+  useEffect(() => {
+    const storedChats = localStorage.getItem("previous_chats");
+    if (storedChats) {
+      try {
+        const parsedChats = JSON.parse(storedChats);
+        setPreviousChats(parsedChats);
+      } catch (error) {
+        console.error("Failed to parse previous chats:", error);
+      }
+    }
+  }, []);
 
   // Loader component (simple spinner)
   const Loader = () => (
@@ -58,6 +99,7 @@ const Dashboard = () => {
     };
   }
 
+  // Weather state
   const [weather, setWeather] = useState({
     temp: "--",
     rainfall: "--",
@@ -68,6 +110,7 @@ const Dashboard = () => {
   const [date, setDate] = useState("");
 
   useEffect(() => {
+    // 1. Date Formatting (Independent of API call)
     const today = new Date();
     const formattedDate = today.toLocaleDateString("en-IN", {
       day: "2-digit",
@@ -76,37 +119,92 @@ const Dashboard = () => {
     });
     setDate(formattedDate);
 
+    // 2. Stabilize Latitude/Longitude and Trigger Fetch
+    // Use the actual primitive values for the dependency array
+    const latitude = parseFloat(user?.latitude) || 10.8505;
+    const longitude = parseFloat(user?.longitude) || 76.2711;
+
     setLoading(true);
 
-    fetch("https://wttr.in/Kerala?format=j1")
-      .then((res) => res.json())
+    // Setup AbortController for fetch cleanup
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    // Fetch from Open-Meteo API
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=relative_humidity_2m,precipitation&timezone=auto`;
+
+    fetch(url, { signal })
+      .then((res) => {
+        if (!res.ok) {
+          // Throw an error to be caught by the .catch block
+          throw new Error("Failed to fetch weather data.");
+        }
+        return res.json();
+      })
       .then((data) => {
-        const current = data.current_condition[0];
-        const hourly = data.weather[0].hourly[0];
+        // Check if the fetch was aborted before setting state
+        if (signal.aborted) return;
+
+        if (!data.current_weather) {
+          setWeather({
+            temp: "--",
+            rainfall: "--",
+            humidity: "--",
+            alert: translations.weather.error[language],
+          });
+          return;
+        }
+
+        const current = data.current_weather;
+
+        // Use optional chaining (?. and ?.[]) for safer data access
+        const humidity = data.hourly?.relative_humidity_2m?.[0] ?? "--";
+        // Set rainfall to 0 if null/undefined, otherwise use the value
+        const rainfall = data.hourly?.precipitation?.[0] ?? 0;
 
         setWeather({
-          temp: `${current.temp_C}°C`,
-          humidity: `${current.humidity}%`,
-          // Use precipMM for rainfall amount (mm)
-          rainfall: `${hourly.precipMM || "0"} mm`,
-          alert:
-            hourly.weatherDesc && hourly.weatherDesc[0]
-              ? hourly.weatherDesc[0].value
-              : translations.weather.noAlert[language],
+          temp: `${Math.round(current.temperature)}°C`, // Added rounding for clean temp
+          humidity: `${humidity}%`,
+          rainfall: `${rainfall} mm`,
+          alert: getWeatherDescription(current.weathercode),
         });
-
-        setLoading(false);
       })
-      .catch(() => {
+      .catch((err) => {
+        // Ignore AbortError if fetch was cancelled on purpose
+        if (err.name === "AbortError") return;
+
+        console.error("Weather fetch error:", err);
         setWeather({
           temp: "--",
           rainfall: "--",
           humidity: "--",
           alert: translations.weather.error[language],
         });
+      })
+      .finally(() => {
+        // Check if the fetch was aborted before setting state
+        if (signal.aborted) return;
         setLoading(false);
       });
-  }, [language]);
+
+    // Cleanup function: Abort the fetch request if the dependencies change
+    // or the component unmounts.
+    return () => {
+      controller.abort();
+    };
+
+    // FIX: Depend on primitive values (latitude, longitude) and language.
+    // The effect will only re-run if one of these values changes.
+  }, [
+    language,
+    user?.latitude, // Depend on primitive strings/numbers from user
+    user?.longitude,
+    setDate,
+    setLoading,
+    setWeather,
+    translations, // Include all external dependencies as per React rules
+    getWeatherDescription,
+  ]);
 
   return (
     <Box
@@ -248,23 +346,39 @@ const Dashboard = () => {
         </div>
       </section>
 
-      {/* Recent Activity */}
       <section className="recent-card" style={{ marginTop: 40 }}>
         <h3>{translations.recentActivity[language]}</h3>
         <p className="recent-sub">{translations.recentSub[language]}</p>
-        <div
-          className="recent-empty"
-          style={{
-            textAlign: "center",
-            padding: 40,
-            color: "#bbb",
-            fontStyle: "italic",
-          }}
-        >
-          <Description style={{ fontSize: 40, color: "rgb(106, 27, 154)" }} />
-          <p>{translations.noRecent[language]}</p>
-          <p>{translations.startBy[language]}</p>
-        </div>
+
+        {previousChats.length === 0 ? (
+          <div
+            className="recent-empty"
+            style={{
+              textAlign: "center",
+              padding: 40,
+              color: "#bbb",
+              fontStyle: "italic",
+            }}
+          >
+            <Description style={{ fontSize: 40, color: "rgb(106, 27, 154)" }} />
+            <p>{translations.noRecent[language]}</p>
+            <p>{translations.startBy[language]}</p>
+          </div>
+        ) : (
+          <ul className="recent-list">
+            {previousChats.map((chat) => (
+              <li
+                key={chat.id}
+                className="recent-item"
+                onClick={() => navigate(`/dashboard/ask?chatId=${chat.id}`)}
+                style={{ cursor: "pointer" }}
+              >
+                <Description style={{ marginRight: 8, color: "#6a1b9a" }} />
+                {chat.title}
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       {/* Footer Cards */}
