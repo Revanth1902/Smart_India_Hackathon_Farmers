@@ -75,6 +75,8 @@ export default function FarmerProfile() {
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
 
+  const token = localStorage.getItem("token"); // JWT token stored here
+
   useEffect(() => {
     if (!selectedImage) {
       setPreview(farmerData.profileImage);
@@ -102,52 +104,98 @@ export default function FarmerProfile() {
     setEditedData({ ...editedData, [field]: value });
   };
 
-  const handleSave = async () => {
+  // New function: upload image immediately on selection
+  const uploadImage = async (file) => {
+    if (!file) return;
     setLoading(true);
     try {
       const formData = new FormData();
+      formData.append("image", file);
 
-      // Append form fields
-      formData.append("mobile", farmerData.mobile);
-      formData.append("name", editedData.name);
-      formData.append("state", editedData.state);
-      formData.append("district", editedData.district);
-      formData.append("village", editedData.village);
-      formData.append("landType", editedData.landType);
-      formData.append("farmSize", editedData.farmSize);
-
-      // If new image selected, add it
-      if (selectedImage) {
-        formData.append("image", selectedImage);
-      }
-
-      const response = await fetch(
-        "https://farmer-backend-dqit.onrender.com/api/auth/update",
+      const res = await fetch(
+        "https://farmer-backend-dqit.onrender.com/api/auth/update-image",
         {
           method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
           body: formData,
         }
       );
 
-      const data = await response.json();
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Image upload failed");
 
-      if (!response.ok || !data.user) {
-        throw new Error(data.message || "Failed to update");
-      }
-
-      const updated = data.user;
-
+      // Update local user data with new image URL
       const updatedUser = {
         ...storedUser,
-        ...updated,
-        imageUrl: updated.imageUrl || storedUser.imageUrl,
+        imageUrl: data.imageUrl,
+      };
+
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      setFarmerData((prev) => ({ ...prev, profileImage: data.imageUrl }));
+      setPreview(data.imageUrl);
+      setSelectedImage(null);
+    } catch (error) {
+      console.error("Image upload error:", error);
+      alert("Failed to upload image");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle image selection
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedImage(file);
+      uploadImage(file);
+    }
+  };
+
+  // Save other profile info (without image)
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      const body = {
+        name: editedData.name,
+        state: editedData.state,
+        district: editedData.district,
+        village: editedData.village,
+        landType: editedData.landType,
+        farmSize: editedData.farmSize,
+        // You can add prevCrops and presentCrop if you want to allow editing here too
+      };
+
+      const res = await fetch(
+        "https://farmer-backend-dqit.onrender.com/api/auth/update-profile",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(body),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok || !data.user) {
+        throw new Error(data.message || "Failed to update profile");
+      }
+
+      // Update localStorage and state
+      const updatedUser = {
+        ...storedUser,
+        ...data.user,
+        imageUrl: data.user.imageUrl || storedUser.imageUrl,
       };
 
       localStorage.setItem("user", JSON.stringify(updatedUser));
       setFarmerData(updatedUser);
       setPreview(updatedUser.imageUrl || "/fallback.png");
       setIsEditOpen(false);
-      setSelectedImage(null);
     } catch (err) {
       console.error("Update error:", err);
       alert("Failed to save changes.");
@@ -180,6 +228,7 @@ export default function FarmerProfile() {
                   bgcolor: "green",
                   color: "#fff",
                 }}
+                disabled={loading}
               >
                 <UploadIcon />
               </IconButton>
@@ -188,12 +237,8 @@ export default function FarmerProfile() {
                 hidden
                 ref={fileInputRef}
                 accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    setSelectedImage(file);
-                  }
-                }}
+                onChange={handleImageChange}
+                disabled={loading}
               />
             </Box>
             <Box>
@@ -211,6 +256,7 @@ export default function FarmerProfile() {
                 borderColor: "#4caf50",
               }}
               onClick={handleEditOpen}
+              disabled={loading}
             >
               Edit
             </Button>
@@ -318,6 +364,7 @@ export default function FarmerProfile() {
                   fullWidth
                   value={editedData[key]}
                   onChange={(e) => handleFieldChange(key, e.target.value)}
+                  disabled={loading}
                 />
               </Grid>
             ))}
