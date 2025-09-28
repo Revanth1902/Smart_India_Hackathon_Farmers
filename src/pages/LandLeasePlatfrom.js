@@ -104,9 +104,12 @@ const dummyLeases = [
 ];
 const LandLeasePlatform = () => {
   const [leases, setLeases] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState("");
 
   const [selectedLease, setSelectedLease] = useState(null);
+  const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
     location: "",
     price: "",
@@ -114,18 +117,16 @@ const LandLeasePlatform = () => {
     contact: "",
     description: "",
   });
-  const [showForm, setShowForm] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
 
-  // Load leases from localStorage or dummy
+  // Load data from localStorage or fallback to dummyLeases
   useEffect(() => {
     const stored = localStorage.getItem("leases");
-    const savedTime = localStorage.getItem("leases_timestamp");
+    const timestamp = localStorage.getItem("leases_timestamp");
 
     setLoading(true);
+
     setTimeout(() => {
-      if (stored && savedTime && Date.now() - savedTime < DAYS_TO_MS) {
+      if (stored && timestamp && Date.now() - timestamp < DAYS_TO_MS) {
         setLeases(JSON.parse(stored));
       } else {
         localStorage.setItem("leases", JSON.stringify(dummyLeases));
@@ -133,19 +134,21 @@ const LandLeasePlatform = () => {
         setLeases(dummyLeases);
       }
       setLoading(false);
-    }, 3000); // Simulate loader
+    }, 2000); // Simulated delay
   }, []);
 
+  // Add New Lease Handler
   const handleAddLease = (e) => {
     e.preventDefault();
     setLoading(true);
 
     setTimeout(() => {
       const newLease = { id: Date.now(), ...form };
-      const updated = [newLease, ...leases];
-      setLeases(updated);
-      localStorage.setItem("leases", JSON.stringify(updated));
+      const updatedLeases = [newLease, ...leases];
+      setLeases(updatedLeases);
+      localStorage.setItem("leases", JSON.stringify(updatedLeases));
       localStorage.setItem("leases_timestamp", Date.now());
+
       setForm({
         location: "",
         price: "",
@@ -153,11 +156,14 @@ const LandLeasePlatform = () => {
         contact: "",
         description: "",
       });
+
       setShowForm(false);
+      setSelectedLease(null);
       setLoading(false);
-    }, 3000);
+    }, 2000);
   };
 
+  // Filter + Sort Logic
   const filteredLeases = leases
     .filter(
       (lease) =>
@@ -165,7 +171,7 @@ const LandLeasePlatform = () => {
         lease.size.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => {
-      const getSize = (val) => parseFloat(val.split(" ")[0]); // '2.5 acres' => 2.5
+      const getSize = (val) => parseFloat(val.split(" ")[0]);
       const getPrice = (val) => parseInt(val.replace(/[₹,/ ]/g, ""));
 
       switch (sortOption) {
@@ -186,7 +192,7 @@ const LandLeasePlatform = () => {
     <div style={styles.container}>
       <h1 style={styles.title}>🌾 Land Lease Management</h1>
 
-      {/* Search & Add */}
+      {/* Top Bar */}
       <div style={styles.topBar}>
         <input
           type="text"
@@ -218,7 +224,7 @@ const LandLeasePlatform = () => {
         <div style={styles.loader}>⏳ Loading land leases...</div>
       ) : (
         <>
-          {/* Lease List */}
+          {/* Lease Cards */}
           <div style={styles.section}>
             <h2 style={styles.sectionTitle}>Available Land Leases</h2>
             <div style={styles.grid}>
@@ -239,32 +245,34 @@ const LandLeasePlatform = () => {
             </div>
           </div>
 
-          {/* Details Box */}
+          {/* Lease Details */}
           {selectedLease && (
-            <div style={styles.detailBox}>
-              <button
-                onClick={() => setSelectedLease(null)}
-                style={styles.closeBtn}
-              >
-                ✖
-              </button>
-              <h3 style={styles.cardTitle}>{selectedLease.location}</h3>
-              <p>
-                <strong>Size:</strong> {selectedLease.size}
-              </p>
-              <p>
-                <strong>Price:</strong> {selectedLease.price}
-              </p>
-              <p>
-                <strong>Description:</strong> {selectedLease.description}
-              </p>
-              <p>
-                <strong>Contact:</strong> 📞 {selectedLease.contact}
-              </p>
+            <div style={styles.modalOverlay}>
+              <div style={styles.modal}>
+                <button
+                  onClick={() => setSelectedLease(null)}
+                  style={styles.closeBtn}
+                >
+                  ✖
+                </button>
+                <h2 style={{ marginBottom: 10 }}>{selectedLease.location}</h2>
+                <p>
+                  <strong>Size:</strong> 📏 {selectedLease.size}
+                </p>
+                <p>
+                  <strong>Price:</strong> 💰 {selectedLease.price}
+                </p>
+                <p>
+                  <strong>Description:</strong> 📝 {selectedLease.description}
+                </p>
+                <p>
+                  <strong>Contact:</strong> 📞 {selectedLease.contact}
+                </p>
+              </div>
             </div>
           )}
 
-          {/* Popup Form */}
+          {/* Add Lease Form */}
           {showForm && (
             <div style={styles.modalOverlay}>
               <div style={styles.modal}>
@@ -305,7 +313,7 @@ const LandLeasePlatform = () => {
                     style={styles.input}
                   />
                   <input
-                    type="text"
+                    type="tel"
                     placeholder="Contact Number"
                     value={form.contact}
                     required
@@ -339,7 +347,6 @@ const LandLeasePlatform = () => {
     </div>
   );
 };
-
 // 🌿 Styles
 const styles = {
   container: {
