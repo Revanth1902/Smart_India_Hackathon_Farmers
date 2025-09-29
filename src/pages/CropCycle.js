@@ -91,10 +91,18 @@ const CropDayLabel = styled(Typography)({
   marginTop: "4px",
 });
 
-// --- **FIXED** Helper function to create safe CSS class names ---
+// --- Helper function to create safe CSS class names ---
 const sanitizeForClassName = (name) => {
-  // Replaces spaces and special characters with a hyphen
   return name.toLowerCase().replace(/[\s&]+/g, "-");
+};
+
+// --- NEW Helper function to format dates consistently in LOCAL time ---
+// This replaces .toISOString() and fixes the off-by-one error caused by timezones
+const formatDate = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 };
 
 // --- Helper Function ---
@@ -118,7 +126,8 @@ const getFlattenedPhases = (phases, startDate) => {
       }
       allDays.push({
         globalDay: globalDayCounter++,
-        date: new Date(currentDate).toISOString().split("T")[0],
+        // **FIX:** Use formatDate instead of toISOString()
+        date: formatDate(currentDate),
         phaseName: phase.phase,
         subPhase: relevantDetail.sub_phase,
         description: relevantDetail.description,
@@ -148,7 +157,8 @@ const CropTracker = () => {
     [flattenedData]
   );
 
-  const todayString = new Date().toISOString().split("T")[0];
+  // **FIX:** Use formatDate for today's date as well
+  const todayString = formatDate(new Date());
   const todayData = dayDataMap.get(todayString);
 
   const phaseColorMap = {
@@ -163,7 +173,6 @@ const CropTracker = () => {
   const generateCalendarStyles = () => {
     let styles = "";
     Object.keys(phaseColorMap).forEach((phase) => {
-      // **FIX:** Use the sanitizing function for the class name
       const className = `phase--${sanitizeForClassName(phase)}`;
       styles += `
         .react-calendar__tile.${className} {
@@ -179,10 +188,10 @@ const CropTracker = () => {
 
   const getTileClassName = ({ date, view }) => {
     if (view === "month") {
-      const dateString = date.toISOString().split("T")[0];
+      // **FIX:** Use formatDate to look up the date
+      const dateString = formatDate(date);
       const dayData = dayDataMap.get(dateString);
       if (dayData) {
-        // **FIX:** Use the sanitizing function here as well
         return `phase--${sanitizeForClassName(dayData.phaseName)}`;
       }
     }
@@ -191,7 +200,8 @@ const CropTracker = () => {
 
   const getTileContent = ({ date, view }) => {
     if (view === "month") {
-      const dateString = date.toISOString().split("T")[0];
+      // **FIX:** Use formatDate to look up the date
+      const dateString = formatDate(date);
       const dayData = dayDataMap.get(dateString);
       if (dayData) {
         return <CropDayLabel>Day {dayData.globalDay}</CropDayLabel>;
@@ -201,7 +211,8 @@ const CropTracker = () => {
   };
 
   const handleDayClick = (date) => {
-    const dateString = date.toISOString().split("T")[0];
+    // **FIX:** Use formatDate to look up the clicked date
+    const dateString = formatDate(date);
     const dayData = dayDataMap.get(dateString);
     setSelectedDay(dayData || null);
   };
@@ -322,9 +333,8 @@ const CropTracker = () => {
                 </Typography>
                 <Typography variant="body1">
                   <strong>Date:</strong>{" "}
-                  {new Date(
-                    selectedDay.date + "T12:00:00Z"
-                  ).toLocaleDateString()}
+                  {/* Display the stored YYYY-MM-DD string directly */}
+                  {selectedDay.date}
                 </Typography>
                 <Typography variant="body1">
                   <strong>Sub-phase:</strong> {selectedDay.subPhase}
