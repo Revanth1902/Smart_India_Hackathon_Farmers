@@ -25,6 +25,7 @@ import {
 } from "@mui/material";
 import AgricultureIcon from "@mui/icons-material/Agriculture";
 import { MonetizationOn } from "@mui/icons-material";
+import UploadIcon from "@mui/icons-material/Upload";
 import { useNavigate } from "react-router-dom";
 import CropProgressBar from "./CropProgressbar";
 
@@ -55,6 +56,7 @@ const initialFarmerData = {
       storedUser.presentCrop ? [storedUser.presentCrop] : []
     ),
   presentCrop: storedUser.presentCrop || "",
+  prevCrops: storedUser.prevCrops || "", // ✅ new field for editing
 };
 
 const cropHistory = [
@@ -168,7 +170,7 @@ export default function FarmerProfile() {
     }
   };
 
-  // Save profile info including current crop
+  // Save profile info including crops
   const handleSave = async () => {
     setLoading(true);
     try {
@@ -180,7 +182,8 @@ export default function FarmerProfile() {
         village: editedData.village,
         landType: editedData.landType,
         farmSize: editedData.farmSize,
-        presentCrop: editedData.presentCrop, // ✅ allow updating current crop
+        presentCrop: editedData.presentCrop,
+        prevCrops: editedData.prevCrops, // ✅ include previous crops
       };
 
       const res = await fetch(
@@ -294,6 +297,10 @@ export default function FarmerProfile() {
             <Grid item xs={12} sm={6}>
               Current Crop: {farmerData.presentCrop || "Not set"}
             </Grid>
+            <Grid item xs={12} sm={12}>
+              Previous Crops:{" "}
+              {farmerData.prevCrops ? farmerData.prevCrops : "Not set"}
+            </Grid>
           </Grid>
         </CardContent>
       </Card>
@@ -400,7 +407,8 @@ export default function FarmerProfile() {
               { label: "Village", key: "village" },
               { label: "Land Type", key: "landType" },
               { label: "Farm Size", key: "farmSize", type: "number" },
-              { label: "Current Crop", key: "presentCrop" }, // ✅ new field
+              { label: "Current Crop", key: "presentCrop" },
+              { label: "Previous Crops (comma separated)", key: "prevCrops" }, // ✅ editable crops
             ].map(({ label, key, type = "text" }) => (
               <Grid item xs={12} sm={6} key={key}>
                 <TextField
