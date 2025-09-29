@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -13,6 +13,8 @@ import {
   DialogActions,
   IconButton,
   Button,
+  CircularProgress,
+  Backdrop,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
@@ -144,9 +146,17 @@ const CropTracker = () => {
   const theme = createTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
+  const [isLoading, setIsLoading] = useState(true);
   const [cropStartDate] = useState(new Date("2025-08-27T12:00:00Z"));
   const [activeStartDate, setActiveStartDate] = useState(cropStartDate);
   const [selectedDay, setSelectedDay] = useState(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 4000); // 4-second loader
+    return () => clearTimeout(timer);
+  }, []);
 
   const flattenedData = useMemo(
     () => getFlattenedPhases(paddyData.phases, cropStartDate),
@@ -160,6 +170,13 @@ const CropTracker = () => {
   // **FIX:** Use formatDate for today's date as well
   const todayString = formatDate(new Date());
   const todayData = dayDataMap.get(todayString);
+
+  const totalDays =
+    flattenedData.length > 0
+      ? flattenedData[flattenedData.length - 1].globalDay
+      : 0;
+  const currentDay = todayData ? todayData.globalDay : 0;
+  const progressPercentage = totalDays > 0 ? (currentDay / totalDays) * 100 : 0;
 
   const phaseColorMap = {
     "Land Preparation": "#A5D6A7",
@@ -217,6 +234,17 @@ const CropTracker = () => {
     setSelectedDay(dayData || null);
   };
 
+  if (isLoading) {
+    return (
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={isLoading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+    );
+  }
+
   return (
     <ThemeProvider theme={theme}>
       {generateCalendarStyles()}
@@ -265,7 +293,51 @@ const CropTracker = () => {
             ))}
           </Box>
         </CalendarPaper>
-
+        <Paper
+          elevation={0}
+          sx={{
+            mt: 3,
+            p: 2.5,
+            borderRadius: "12px",
+            backgroundColor: "#F5F5F5",
+            textAlign: "center",
+          }}
+        >
+          <Typography variant="h6" gutterBottom>
+            Crop Progress
+          </Typography>
+          <Box sx={{ position: "relative", display: "inline-flex", mb: 2 }}>
+            <CircularProgress
+              variant="determinate"
+              value={progressPercentage}
+              size={100}
+              thickness={5}
+            />
+            <Box
+              sx={{
+                top: 0,
+                left: 0,
+                bottom: 0,
+                right: 0,
+                position: "absolute",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Typography
+                variant="caption"
+                component="div"
+                color="text.secondary"
+              >
+                {`${Math.round(progressPercentage)}%`}
+              </Typography>
+            </Box>
+          </Box>
+          <Typography variant="body2" color="text.secondary">
+            Day {currentDay} of {totalDays}
+          </Typography>
+        </Paper>
         <Paper
           elevation={0}
           sx={{

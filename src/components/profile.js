@@ -23,6 +23,7 @@ import {
   TextField,
   CircularProgress,
 } from "@mui/material";
+import AgricultureIcon from "@mui/icons-material/Agriculture";
 import { MonetizationOn } from "@mui/icons-material";
 import UploadIcon from "@mui/icons-material/Upload";
 import { useNavigate } from "react-router-dom";
@@ -335,14 +336,40 @@ export default function FarmerProfile() {
         </CardContent>
       </Card>
 
-      {/* === Manage Loans === */}
-      <div
-        className="card"
-        onClick={() => navigate("/dashboard/loans")}
-        style={{ cursor: "pointer", textAlign: "center" }}
-      >
-        <MonetizationOn style={{ fontSize: 36, color: "#f57c00" }} />
-        <p>Manage Loans</p>
+      <div style={{ display: "flex", justifyContent: "center", gap: "20px" }}>
+        {/* === Manage Loans === */}
+        <div
+          className="card"
+          onClick={() => navigate("/dashboard/loans")}
+          style={{
+            cursor: "pointer",
+            textAlign: "center",
+            padding: "20px",
+            border: "1px solid #ddd",
+            borderRadius: "8px",
+            width: "150px",
+          }}
+        >
+          <MonetizationOn style={{ fontSize: 36, color: "#f57c00" }} />
+          <p>Manage Loans</p>
+        </div>
+
+        {/* === Crop Cycle === */}
+        <div
+          className="card"
+          onClick={() => navigate("/dashboard/cropcycle")}
+          style={{
+            cursor: "pointer",
+            textAlign: "center",
+            padding: "20px",
+            border: "1px solid #ddd",
+            borderRadius: "8px",
+            width: "150px",
+          }}
+        >
+          <AgricultureIcon style={{ fontSize: 36, color: "#4caf50" }} />
+          <p>Crop Cycle</p>
+        </div>
       </div>
 
       {/* === Edit Dialog === */}
