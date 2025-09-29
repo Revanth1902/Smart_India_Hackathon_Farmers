@@ -128,8 +128,8 @@ const App = () => {
                         path="/alerts/:type"
                         element={<AlertsDetailPage />}
                       />
+                      <Route path="cropcycle" element={<CropTracker />} />
                     </Routes>
-                    <Route path="cropcycle" element={<CropTracker />} />
                   </Box>
                   {/* <VoiceAssistantButton />
                   <SummaryBar /> */}

@@ -1,17 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Box,
   Typography,
-  Grid,
   Paper,
-  Button,
   ThemeProvider,
   createTheme,
   useMediaQuery,
   CssBaseline,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  Button,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
-import paddyData from "../utils/paddy.json"; // 👈 Your JSON file
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
+import paddyData from "../utils/paddy.json"; // Your JSON data
 
 // --- Styled Components ---
 const MainContainer = styled(Box)(({ theme }) => ({
@@ -31,26 +38,38 @@ const CalendarPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
   borderRadius: "12px",
   background: "#ffffff",
+  "& .react-calendar": {
+    width: "100%",
+    border: "none",
+    fontFamily: theme.typography.fontFamily,
+  },
+  "& .react-calendar__tile": {
+    borderRadius: "8px",
+    height: "70px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    padding: "4px",
+    textAlign: "center",
+    color: "#333",
+  },
+  "& .react-calendar__tile--now": {
+    background: "#e6f5ff",
+    border: `2px solid ${theme.palette.primary.main}`,
+  },
+  "& .react-calendar__tile--active": {
+    background: theme.palette.primary.main,
+    color: theme.palette.primary.contrastText,
+  },
+  "& .react-calendar__month-view__weekdays__weekday": {
+    textAlign: "center",
+  },
   [theme.breakpoints.down("sm")]: {
     padding: theme.spacing(2),
-  },
-}));
-
-const DayCell = styled(Paper)(({ theme, bgcolor, iscurrent }) => ({
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  aspectRatio: "1 / 1",
-  borderRadius: "8px",
-  backgroundColor: bgcolor,
-  border:
-    iscurrent === "true"
-      ? `2px solid ${theme.palette.primary.main}`
-      : "1px solid #eee",
-  transition: "transform 0.2s ease-in-out",
-  cursor: "pointer",
-  "&:hover": {
-    transform: "scale(1.05)",
+    "& .react-calendar__tile": {
+      height: "55px",
+    },
   },
 }));
 
@@ -66,98 +85,133 @@ const LegendColorBox = styled(Box)({
   borderRadius: "4px",
 });
 
-// --- Helper Function to Flatten Days with Phases ---
-const getFlattenedPhases = (phases) => {
-  let dayCounter = 1;
-  return phases.flatMap((phase, index) => {
-    return phase.daily_details.map((detail) => ({
-      globalDay: dayCounter++,
-      phaseName: phase.phase,
-      subPhase: detail.sub_phase,
-      description: detail.description,
-      precautions: detail.precautions,
-    }));
+const CropDayLabel = styled(Typography)({
+  fontSize: "0.7rem",
+  fontWeight: "bold",
+  marginTop: "4px",
+});
+
+// --- **FIXED** Helper function to create safe CSS class names ---
+const sanitizeForClassName = (name) => {
+  // Replaces spaces and special characters with a hyphen
+  return name.toLowerCase().replace(/[\s&]+/g, "-");
+};
+
+// --- Helper Function ---
+const getFlattenedPhases = (phases, startDate) => {
+  const allDays = [];
+  let currentDate = new Date(startDate);
+  let globalDayCounter = 1;
+
+  phases.forEach((phase) => {
+    const sortedDetails = [...phase.daily_details].sort(
+      (a, b) => a.day - b.day
+    );
+    for (let dayInPhase = 1; dayInPhase <= phase.days_required; dayInPhase++) {
+      let relevantDetail = sortedDetails[0];
+      for (const detail of sortedDetails) {
+        if (detail.day <= dayInPhase) {
+          relevantDetail = detail;
+        } else {
+          break;
+        }
+      }
+      allDays.push({
+        globalDay: globalDayCounter++,
+        date: new Date(currentDate).toISOString().split("T")[0],
+        phaseName: phase.phase,
+        subPhase: relevantDetail.sub_phase,
+        description: relevantDetail.description,
+        precautions: relevantDetail.precautions,
+      });
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
   });
+  return allDays;
 };
 
 // --- Main Component ---
 const CropTracker = () => {
   const theme = createTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-  const [currentDate] = useState(new Date("2025-09-28T12:00:00Z"));
 
-  const flattened = getFlattenedPhases(paddyData.phases);
-  const todayDay = currentDate.getDate(); // Assuming 1st = day 1
-  const todayData = flattened[todayDay - 1];
+  const [cropStartDate] = useState(new Date("2025-08-27T12:00:00Z"));
+  const [activeStartDate, setActiveStartDate] = useState(cropStartDate);
+  const [selectedDay, setSelectedDay] = useState(null);
 
-  const getPhaseColor = (phaseName) => {
-    // Assign unique color per phase (you can make this smarter)
-    const colorMap = {
-      "Land Preparation": "#A5D6A7",
-      "Nursery Preparation & Seeding": "#90CAF9",
-      Transplanting: "#FFE082",
-      "Vegetative Stage": "#CE93D8",
-      "Reproductive Stage": "#FFAB91",
-      "Maturity & Harvest": "#B0BEC5",
-    };
-    return colorMap[phaseName] || "#f0f0f0";
+  const flattenedData = useMemo(
+    () => getFlattenedPhases(paddyData.phases, cropStartDate),
+    [cropStartDate]
+  );
+  const dayDataMap = useMemo(
+    () => new Map(flattenedData.map((item) => [item.date, item])),
+    [flattenedData]
+  );
+
+  const todayString = new Date().toISOString().split("T")[0];
+  const todayData = dayDataMap.get(todayString);
+
+  const phaseColorMap = {
+    "Land Preparation": "#A5D6A7",
+    "Nursery Preparation & Seeding": "#90CAF9",
+    Transplanting: "#FFE082",
+    "Vegetative Stage": "#CE93D8",
+    "Reproductive Stage": "#FFAB91",
+    "Maturity & Harvest": "#B0BEC5",
   };
 
-  const renderCalendar = () => {
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    const today = currentDate.getDate();
-    const firstDayOfMonth = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const generateCalendarStyles = () => {
+    let styles = "";
+    Object.keys(phaseColorMap).forEach((phase) => {
+      // **FIX:** Use the sanitizing function for the class name
+      const className = `phase--${sanitizeForClassName(phase)}`;
+      styles += `
+        .react-calendar__tile.${className} {
+          background-color: ${phaseColorMap[phase]};
+        }
+        .react-calendar__tile.${className}:hover {
+          opacity: 0.8;
+        }
+      `;
+    });
+    return <style>{styles}</style>;
+  };
 
-    const calendarDays = [];
-    for (let i = 0; i < firstDayOfMonth; i++) {
-      calendarDays.push(<Grid item xs={1.714} key={`empty-${i}`} />);
+  const getTileClassName = ({ date, view }) => {
+    if (view === "month") {
+      const dateString = date.toISOString().split("T")[0];
+      const dayData = dayDataMap.get(dateString);
+      if (dayData) {
+        // **FIX:** Use the sanitizing function here as well
+        return `phase--${sanitizeForClassName(dayData.phaseName)}`;
+      }
     }
+    return null;
+  };
 
-    for (let day = 1; day <= daysInMonth; day++) {
-      const dayData = flattened[day - 1];
-      const bgcolor = dayData ? getPhaseColor(dayData.phaseName) : "#f0f0f0";
-
-      calendarDays.push(
-        <Grid item xs={1.714} key={day}>
-          <DayCell
-            elevation={day === today ? 3 : 0}
-            bgcolor={bgcolor}
-            iscurrent={day === today ? "true" : "false"}
-          >
-            <Typography variant="body2">{day}</Typography>
-          </DayCell>
-        </Grid>
-      );
+  const getTileContent = ({ date, view }) => {
+    if (view === "month") {
+      const dateString = date.toISOString().split("T")[0];
+      const dayData = dayDataMap.get(dateString);
+      if (dayData) {
+        return <CropDayLabel>Day {dayData.globalDay}</CropDayLabel>;
+      }
     }
+    return null;
+  };
 
-    const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-    return (
-      <>
-        <Grid container spacing={1} sx={{ marginBottom: 1 }}>
-          {dayLabels.map((day) => (
-            <Grid item xs={1.714} key={day} sx={{ textAlign: "center" }}>
-              <Typography variant="caption" color="text.secondary">
-                {day}
-              </Typography>
-            </Grid>
-          ))}
-        </Grid>
-
-        <Grid container spacing={1}>
-          {calendarDays}
-        </Grid>
-      </>
-    );
+  const handleDayClick = (date) => {
+    const dateString = date.toISOString().split("T")[0];
+    const dayData = dayDataMap.get(dateString);
+    setSelectedDay(dayData || null);
   };
 
   return (
     <ThemeProvider theme={theme}>
+      {generateCalendarStyles()}
       <CssBaseline />
       <MainContainer>
-        <Box sx={{ textAlign: "center", mb: 2 }}>
+        <Box sx={{ textAlign: "center", mb: 3 }}>
           <Typography
             variant={isSmallScreen ? "h5" : "h4"}
             component="h1"
@@ -166,80 +220,130 @@ const CropTracker = () => {
             🌾 Paddy Crop Tracker
           </Typography>
           <Typography variant="subtitle1" color="text.secondary">
-            Monitoring day-by-day activities
+            Full schedule starting from {cropStartDate.toLocaleDateString()}
           </Typography>
         </Box>
 
-        {/* Calendar */}
         <CalendarPaper>
-          <Box sx={{ textAlign: "center", mb: 3 }}>
-            <Typography variant="h5" fontWeight={500}>
-              September 2025
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Full lifecycle day mapping
-            </Typography>
-          </Box>
-
-          {renderCalendar()}
-
-          <Box sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 1 }}>
+          <Calendar
+            activeStartDate={activeStartDate}
+            onActiveStartDateChange={({ activeStartDate }) =>
+              setActiveStartDate(activeStartDate)
+            }
+            value={new Date()}
+            onClickDay={handleDayClick}
+            tileClassName={getTileClassName}
+            tileContent={getTileContent}
+          />
+          <Box
+            sx={{
+              mt: 3,
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "12px",
+              justifyContent: "center",
+            }}
+          >
             {paddyData.phases.map((phase) => (
               <LegendItem key={phase.phase}>
                 <LegendColorBox
-                  sx={{ backgroundColor: getPhaseColor(phase.phase) }}
+                  sx={{ backgroundColor: phaseColorMap[phase.phase] }}
                 />
-                <Typography variant="body2">
-                  {phase.phase} ({phase.days_required} days)
-                </Typography>
+                <Typography variant="body2">{phase.phase}</Typography>
               </LegendItem>
             ))}
           </Box>
         </CalendarPaper>
 
-        {/* Current Task Information */}
         <Paper
           elevation={0}
-          sx={{ mt: 2, p: 2, borderRadius: "12px", backgroundColor: "#F5F5F5" }}
+          sx={{
+            mt: 3,
+            p: 2.5,
+            borderRadius: "12px",
+            backgroundColor: "#F5F5F5",
+          }}
         >
           {todayData ? (
             <>
+              <Typography variant="h6" gutterBottom>
+                Today's Activity (Day {todayData.globalDay})
+              </Typography>
               <Typography variant="subtitle1" gutterBottom>
-                📅 Day {todayDay}: <strong>{todayData.phaseName}</strong>
+                Phase: <strong>{todayData.phaseName}</strong>
               </Typography>
               <Typography variant="body2">
                 <strong>Sub-phase:</strong> {todayData.subPhase}
               </Typography>
-              <Typography variant="body2">
+              <Typography variant="body2" sx={{ mt: 1 }}>
                 <strong>Description:</strong> {todayData.description}
               </Typography>
-              <Typography variant="body2">
+              <Typography variant="body2" sx={{ mt: 1 }}>
                 <strong>Precautions:</strong> {todayData.precautions}
               </Typography>
             </>
           ) : (
-            <Typography variant="body2" color="text.secondary">
-              No data for today.
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              sx={{ textAlign: "center" }}
+            >
+              No scheduled crop activity for today.
             </Typography>
           )}
         </Paper>
 
-        {/* Future Feature */}
-        <Button
-          variant="contained"
+        <Dialog
+          open={Boolean(selectedDay)}
+          onClose={() => setSelectedDay(null)}
           fullWidth
-          sx={{
-            mt: 2,
-            py: 1.5,
-            textTransform: "none",
-            fontSize: "1rem",
-            borderRadius: "12px",
-            backgroundColor: "#2E7D32",
-            "&:hover": { backgroundColor: "#1B5E20" },
-          }}
+          maxWidth="sm"
         >
-          Mark as Completed
-        </Button>
+          <DialogTitle>
+            Details for Day {selectedDay?.globalDay}
+            <IconButton
+              aria-label="close"
+              onClick={() => setSelectedDay(null)}
+              sx={{
+                position: "absolute",
+                right: 8,
+                top: 8,
+                color: (theme) => theme.palette.grey[500],
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent dividers>
+            {selectedDay ? (
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                <Typography variant="h6" component="div">
+                  Phase: <strong>{selectedDay.phaseName}</strong>
+                </Typography>
+                <Typography variant="body1">
+                  <strong>Date:</strong>{" "}
+                  {new Date(
+                    selectedDay.date + "T12:00:00Z"
+                  ).toLocaleDateString()}
+                </Typography>
+                <Typography variant="body1">
+                  <strong>Sub-phase:</strong> {selectedDay.subPhase}
+                </Typography>
+                <Typography variant="body1">
+                  <strong>Description:</strong> {selectedDay.description}
+                </Typography>
+                <Typography variant="body1">
+                  <strong>Precautions:</strong> {selectedDay.precautions}
+                </Typography>
+              </Box>
+            ) : (
+              <Typography>No data available for this day.</Typography>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setSelectedDay(null)}>Close</Button>
+          </DialogActions>
+        </Dialog>
       </MainContainer>
     </ThemeProvider>
   );
