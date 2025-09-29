@@ -1,0 +1,245 @@
+{
+  "crop": "Paddy",
+  "phases": [
+    {
+      "phase": "Land Preparation",
+      "days_required": 5,
+      "daily_details": [
+        {
+          "day": 1,
+          "sub_phase": "Initial Ploughing",
+          "description": "First round of ploughing to break soil clods.",
+          "precautions": "Ensure soil moisture is adequate before ploughing."
+        },
+        {
+          "day": 2,
+          "sub_phase": "Secondary Ploughing",
+          "description": "Further soil refinement with rotavator.",
+          "precautions": "Avoid water stagnation."
+        },
+        {
+          "day": 3,
+          "sub_phase": "Levelling",
+          "description": "Field leveling for uniform water distribution.",
+          "precautions": "Check for depressions or high spots."
+        },
+        {
+          "day": 4,
+          "sub_phase": "Puddling",
+          "description": "Wet tillage to reduce percolation and prepare for transplanting.",
+          "precautions": "Maintain standing water level."
+        },
+        {
+          "day": 5,
+          "sub_phase": "Field Rest",
+          "description": "Let field settle before transplanting.",
+          "precautions": "Avoid over-drying of soil."
+        }
+      ]
+    },
+    {
+      "phase": "Nursery Preparation & Seeding",
+      "days_required": 15,
+      "daily_details": [
+        {
+          "day": 1,
+          "sub_phase": "Seed Selection",
+          "description": "Select healthy and certified seeds.",
+          "precautions": "Avoid using discolored or damaged seeds."
+        },
+        {
+          "day": 2,
+          "sub_phase": "Seed Treatment",
+          "description": "Treat seeds with fungicide to prevent seed-borne diseases.",
+          "precautions": "Follow recommended dosage."
+        },
+        {
+          "day": 3,
+          "sub_phase": "Sowing in Nursery",
+          "description": "Broadcast pre-soaked seeds in prepared nursery beds.",
+          "precautions": "Ensure uniform distribution."
+        },
+        {
+          "day": 4,
+          "sub_phase": "Irrigation",
+          "description": "Maintain 2-3 cm water level in nursery.",
+          "precautions": "Avoid waterlogging."
+        },
+        {
+          "day": 5,
+          "sub_phase": "Monitoring Germination",
+          "description": "Check for uniform seedling emergence.",
+          "precautions": "Remove weeds if any."
+        },
+        {
+          "day": 6,
+          "sub_phase": "Nutrient Application",
+          "description": "Apply starter dose of nitrogen (Urea).",
+          "precautions": "Do not overapply."
+        },
+        {
+          "day": 7,
+          "sub_phase": "Weed Management",
+          "description": "Manually remove emerging weeds.",
+          "precautions": "Avoid disturbing seedlings."
+        },
+        {
+          "day": 8,
+          "sub_phase": "Pest Monitoring",
+          "description": "Check for pest presence like thrips.",
+          "precautions": "Use biopesticides if needed."
+        },
+        {
+          "day": 9,
+          "sub_phase": "Maintain Water Level",
+          "description": "Ensure consistent water depth.",
+          "precautions": "Avoid drying."
+        },
+        {
+          "day": 10,
+          "sub_phase": "Hardening",
+          "description": "Expose seedlings to less water to prepare for transplant.",
+          "precautions": "Do not dry out completely."
+        },
+        {
+          "day": 11,
+          "sub_phase": "Check Growth",
+          "description": "Seedlings should have 3-4 leaves.",
+          "precautions": "Check for yellowing."
+        },
+        {
+          "day": 12,
+          "sub_phase": "Final Irrigation",
+          "description": "One day before transplanting.",
+          "precautions": "Avoid overwatering."
+        },
+        {
+          "day": 13,
+          "sub_phase": "Prepare for Uprooting",
+          "description": "Loosen nursery soil.",
+          "precautions": "Do not damage roots."
+        },
+        {
+          "day": 14,
+          "sub_phase": "Uprooting Seedlings",
+          "description": "Gently uproot seedlings for transplant.",
+          "precautions": "Handle carefully."
+        },
+        {
+          "day": 15,
+          "sub_phase": "Transport to Main Field",
+          "description": "Move seedlings to main field location.",
+          "precautions": "Avoid stacking or overheating."
+        }
+      ]
+    },
+    {
+      "phase": "Transplanting",
+      "days_required": 2,
+      "daily_details": [
+        {
+          "day": 1,
+          "sub_phase": "Planting",
+          "description": "Transplant 20-25 day old seedlings to main field.",
+          "precautions": "Maintain proper spacing (20x15 cm)."
+        },
+        {
+          "day": 2,
+          "sub_phase": "Initial Irrigation",
+          "description": "Flood field lightly after transplant.",
+          "precautions": "Avoid water stress."
+        }
+      ]
+    },
+    {
+      "phase": "Vegetative Stage",
+      "days_required": 30,
+      "daily_details": [
+        {
+          "day": 1,
+          "sub_phase": "Establishment",
+          "description": "Seedlings start to establish.",
+          "precautions": "Monitor water and weed growth."
+        },
+        {
+          "day": 10,
+          "sub_phase": "Tillering Begins",
+          "description": "Multiple tillers start emerging from plant base.",
+          "precautions": "Apply nitrogen fertilizer."
+        },
+        {
+          "day": 20,
+          "sub_phase": "Maximum Tillering",
+          "description": "Maximum tillers are formed.",
+          "precautions": "Avoid water stress, control weeds."
+        },
+        {
+          "day": 30,
+          "sub_phase": "Tillering Ends",
+          "description": "Tillering completes.",
+          "precautions": "Prepare for panicle initiation."
+        }
+      ]
+    },
+    {
+      "phase": "Reproductive Stage",
+      "days_required": 35,
+      "daily_details": [
+        {
+          "day": 1,
+          "sub_phase": "Panicle Initiation",
+          "description": "Panicle starts forming inside stem.",
+          "precautions": "Apply phosphorus and potassium."
+        },
+        {
+          "day": 10,
+          "sub_phase": "Booting",
+          "description": "Swollen leaf sheath seen.",
+          "precautions": "Maintain water level, avoid stress."
+        },
+        {
+          "day": 20,
+          "sub_phase": "Heading",
+          "description": "Panicles emerge from sheath.",
+          "precautions": "Protect from pests and diseases."
+        },
+        {
+          "day": 25,
+          "sub_phase": "Flowering",
+          "description": "Pollination and fertilization occur.",
+          "precautions": "Critical period, no water shortage."
+        },
+        {
+          "day": 35,
+          "sub_phase": "Grain Formation Begins",
+          "description": "Grains start forming.",
+          "precautions": "Maintain nutrients and water."
+        }
+      ]
+    },
+    {
+      "phase": "Maturity & Harvest",
+      "days_required": 20,
+      "daily_details": [
+        {
+          "day": 1,
+          "sub_phase": "Milking Stage",
+          "description": "Grains have milky fluid inside.",
+          "precautions": "Avoid water stress."
+        },
+        {
+          "day": 10,
+          "sub_phase": "Dough Stage",
+          "description": "Grains are doughy and hardening.",
+          "precautions": "Stop irrigation gradually."
+        },
+        {
+          "day": 20,
+          "sub_phase": "Harvesting",
+          "description": "Grains turn golden yellow, ready for harvest.",
+          "precautions": "Harvest before shattering starts."
+        }
+      ]
+    }
+  ]
+}

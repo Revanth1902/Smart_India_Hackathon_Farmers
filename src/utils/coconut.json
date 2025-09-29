@@ -1,0 +1,178 @@
+{
+  "crop": "Coconut",
+  "scientific_name": "Cocos nucifera",
+  "cultivation_duration_months": 12,
+  "phases": [
+    {
+      "phase": "Land Preparation",
+      "duration_days": 7,
+      "daily_details": [
+        {
+          "day": 1,
+          "sub_phase": "Site Selection",
+          "description": "Choose well-drained, sandy loam soil with good sunlight.",
+          "precautions": "Avoid waterlogged or heavy clay soils."
+        },
+        {
+          "day": 2,
+          "sub_phase": "Soil Testing",
+          "description": "Check pH (should be between 5.5 and 7.5) and nutrient status.",
+          "precautions": "Apply lime if soil is too acidic."
+        },
+        {
+          "day": 3,
+          "sub_phase": "Clearing and Leveling",
+          "description": "Remove weeds and stones; level the field.",
+          "precautions": "Avoid removing too much topsoil."
+        },
+        {
+          "day": 4,
+          "sub_phase": "Pit Digging",
+          "description": "Dig pits of size 3ft x 3ft x 3ft at 7.5m x 7.5m spacing.",
+          "precautions": "Keep proper spacing for good root spread."
+        },
+        {
+          "day": 5,
+          "sub_phase": "Pit Treatment",
+          "description": "Fill pits with topsoil, compost, and neem cake.",
+          "precautions": "Avoid fresh manure to prevent root burn."
+        },
+        {
+          "day": 6,
+          "sub_phase": "Irrigation Setup",
+          "description": "Install irrigation system if needed (drip preferred).",
+          "precautions": "Test irrigation lines before planting."
+        },
+        {
+          "day": 7,
+          "sub_phase": "Field Rest",
+          "description": "Allow soil to settle before transplanting.",
+          "precautions": "Cover pits to prevent animal entry."
+        }
+      ]
+    },
+    {
+      "phase": "Planting",
+      "duration_days": 2,
+      "daily_details": [
+        {
+          "day": 1,
+          "sub_phase": "Seedling Selection",
+          "description": "Use 8–12 month old healthy seedlings from high-yielding mother palms.",
+          "precautions": "Avoid diseased or weak seedlings."
+        },
+        {
+          "day": 2,
+          "sub_phase": "Transplanting",
+          "description": "Plant seedlings in prepared pits and firm the soil.",
+          "precautions": "Plant during early monsoon or irrigate after planting."
+        }
+      ]
+    },
+    {
+      "phase": "Establishment Phase (Year 1)",
+      "duration_days": 365,
+      "monthly_summary": [
+        {
+          "month": 1,
+          "activities": [
+            "Initial irrigation after planting.",
+            "Mulching around base with dry leaves."
+          ],
+          "precautions": "Avoid water stagnation around root zone."
+        },
+        {
+          "month": 2,
+          "activities": [
+            "Weed removal.",
+            "Light irrigation depending on rainfall."
+          ],
+          "precautions": "Do not damage young roots while weeding."
+        },
+        {
+          "month": 3,
+          "activities": [
+            "First dose of NPK fertilizer.",
+            "Add neem cake around base."
+          ],
+          "precautions": "Avoid over-fertilization."
+        },
+        {
+          "month": 6,
+          "activities": [
+            "Second dose of fertilizer.",
+            "Earthing up around the base."
+          ],
+          "precautions": "Monitor for early signs of pests like red palm weevil."
+        },
+        {
+          "month": 12,
+          "activities": [
+            "Final fertilizer dose of the year.",
+            "Install support if the plant is leaning."
+          ],
+          "precautions": "Do not damage collar region."
+        }
+      ]
+    },
+    {
+      "phase": "Growth Phase (Years 2–5)",
+      "description": "Palm grows vegetatively and develops canopy. Fruiting begins in 4–5 years.",
+      "yearly_summary": [
+        {
+          "year": 2,
+          "activities": [
+            "Regular irrigation (especially in dry months).",
+            "Apply 1/3rd full dose of fertilizer (NPK + Mg).",
+            "Apply organic mulch."
+          ]
+        },
+        {
+          "year": 3,
+          "activities": [
+            "Weeding, pest management (mite, rhinoceros beetle).",
+            "Full dose of fertilizer in split applications."
+          ]
+        },
+        {
+          "year": 4,
+          "activities": [
+            "First flowering expected.",
+            "Ensure adequate boron and zinc nutrition."
+          ]
+        },
+        {
+          "year": 5,
+          "activities": [
+            "Early nut setting stage.",
+            "Start regular harvesting if nuts mature."
+          ]
+        }
+      ]
+    },
+    {
+      "phase": "Mature Phase (Years 6+)",
+      "description": "Regular flowering and nut production stage. Productivity peaks between 10–25 years.",
+      "activities": [
+        "Harvesting every 45–60 days.",
+        "Apply 500g N, 320g P, 1200g K, 25kg FYM per palm/year.",
+        "Monitor and control pests: red palm weevil, eriophyid mite.",
+        "Install pheromone traps for pest control.",
+        "Maintain irrigation and proper drainage."
+      ],
+      "precautions": [
+        "Avoid excessive water or drought.",
+        "Timely pruning of dried fronds."
+      ]
+    },
+    {
+      "phase": "Decline Phase (30+ years)",
+      "description": "Yield starts to decline; palms may be removed or replanted.",
+      "actions": [
+        "Monitor for signs of senescence.",
+        "Reduce inputs gradually.",
+        "Plan replanting with intercropping or multi-storey cropping system."
+      ]
+    }
+  ]
+}

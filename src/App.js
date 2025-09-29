@@ -12,6 +12,7 @@ import Cookies from "js-cookie";
 
 // Components
 import AlertsDetailPage from "./pages/AlertsDetailPage";
+import CropTracker from "./pages/CropCycle";
 import AuthWithOTP from "./components/AuthForm";
 import LandLeasePlatform from "./pages/LandLeasePlatfrom";
 import ManageLands from "./pages/manageLands";
@@ -128,6 +129,7 @@ const App = () => {
                         element={<AlertsDetailPage />}
                       />
                     </Routes>
+                    <Route path="cropcycle" element={<CropTracker />} />
                   </Box>
                   {/* <VoiceAssistantButton />
                   <SummaryBar /> */}
