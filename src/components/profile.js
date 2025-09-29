@@ -300,7 +300,7 @@ export default function FarmerProfile() {
               Farm Size: {farmerData.farmSize} acres
             </Grid>
             <Grid item xs={12} sm={6}>
-              Crops: {farmerData.crops.join(", ")}
+              Current Crop: {farmerData.crops.join(", ")}
             </Grid>
           </Grid>
         </CardContent>

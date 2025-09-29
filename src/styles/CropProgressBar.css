@@ -3,6 +3,7 @@
   width: 100%;
   padding: 40px 0;
   font-family: sans-serif;
+  overflow: scroll;
 }
 
 .progress-track {

@@ -27,15 +27,17 @@ import paddyData from "../utils/paddy.json";
 
 // Styled components...
 const MainContainer = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(3),
-  maxWidth: 700,
-  margin: "2rem auto",
-  backgroundColor: "#f9fbf8",
+  padding: theme.spacing(2),
+  width: "95%",
+  margin: "1.5rem auto",
+  backgroundColor: "transparent",
   borderRadius: "16px",
-  boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.07)",
+  boxShadow: "0 4px 24px rgba(0, 0, 0, 0.06)",
   [theme.breakpoints.down("sm")]: {
-    padding: theme.spacing(2),
-    margin: "1rem",
+    padding: theme.spacing(1.5),
+    margin: "1rem auto",
+    width: "95%",
+    boxShadow: "none",
   },
 }));
 
@@ -48,6 +50,11 @@ const CalendarPaper = styled(Paper)(({ theme }) => ({
     border: "none",
     fontFamily: theme.typography.fontFamily,
   },
+
+  "& .react-calendar__month-view__days": {
+    gap: "4px 8px", // Controls vertical and horizontal spacing
+  },
+
   "& .react-calendar__tile": {
     borderRadius: "8px",
     height: "70px",
@@ -223,7 +230,7 @@ const CropTracker = () => {
           background-color: ${phaseColorMap[phase]};
         }
         .react-calendar__tile.${className}:hover {
-          opacity: 0.8;
+          opacity: 0.8  ;
         }
       `;
     });
