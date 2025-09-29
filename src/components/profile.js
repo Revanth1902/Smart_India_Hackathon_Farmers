@@ -25,9 +25,8 @@ import {
 } from "@mui/material";
 import AgricultureIcon from "@mui/icons-material/Agriculture";
 import { MonetizationOn } from "@mui/icons-material";
-import UploadIcon from "@mui/icons-material/Upload";
 import { useNavigate } from "react-router-dom";
-import CropProgressBar from "./CropProgressbar"; // Import the new component
+import CropProgressBar from "./CropProgressbar";
 
 import {
   Chart as ChartJS,
@@ -51,9 +50,11 @@ const initialFarmerData = {
   landType: storedUser.landType || "Unknown",
   farmSize: storedUser.farmSize || "0",
   profileImage: storedUser.imageUrl || "/fallback.png",
-  crops: (storedUser.prevCrops?.split(", ") || []).concat(
-    storedUser.presentCrop ? [storedUser.presentCrop] : []
-  ),
+  crops:
+    (storedUser.prevCrops?.split(", ") || []).concat(
+      storedUser.presentCrop ? [storedUser.presentCrop] : []
+    ),
+  presentCrop: storedUser.presentCrop || "",
 };
 
 const cropHistory = [
@@ -65,7 +66,6 @@ const cropHistory = [
   },
 ];
 
-// Define crop stages and progress data
 const cropStages = [
   "Land Preparation",
   "Nursery Preparation & Seeding",
@@ -94,17 +94,15 @@ export default function FarmerProfile() {
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
 
-  const token = localStorage.getItem("token"); // JWT token stored here
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     if (!selectedImage) {
       setPreview(farmerData.profileImage);
       return;
     }
-
     const objectUrl = URL.createObjectURL(selectedImage);
     setPreview(objectUrl);
-
     return () => URL.revokeObjectURL(objectUrl);
   }, [selectedImage, farmerData.profileImage]);
 
@@ -123,7 +121,7 @@ export default function FarmerProfile() {
     setEditedData({ ...editedData, [field]: value });
   };
 
-  // New function: upload image immediately on selection
+  // Upload image immediately on selection
   const uploadImage = async (file) => {
     if (!file) return;
     setLoading(true);
@@ -145,7 +143,6 @@ export default function FarmerProfile() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Image upload failed");
 
-      // Update local user data with new image URL
       const updatedUser = {
         ...storedUser,
         imageUrl: data.imageUrl,
@@ -163,7 +160,6 @@ export default function FarmerProfile() {
     }
   };
 
-  // Handle image selection
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -172,8 +168,7 @@ export default function FarmerProfile() {
     }
   };
 
-  // Save other profile info (without image)
-  // Save other profile info (without image)
+  // Save profile info including current crop
   const handleSave = async () => {
     setLoading(true);
     try {
@@ -185,6 +180,7 @@ export default function FarmerProfile() {
         village: editedData.village,
         landType: editedData.landType,
         farmSize: editedData.farmSize,
+        presentCrop: editedData.presentCrop, // ✅ allow updating current crop
       };
 
       const res = await fetch(
@@ -193,6 +189,7 @@ export default function FarmerProfile() {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(body),
         }
@@ -204,12 +201,10 @@ export default function FarmerProfile() {
         throw new Error(data.message || "Failed to update profile");
       }
 
-      // Safely rebuild the crops array
       const rebuiltCrops = (data.user.prevCrops?.split(", ") || []).concat(
         data.user.presentCrop ? [data.user.presentCrop] : []
       );
 
-      // Update localStorage and state
       const updatedUser = {
         ...storedUser,
         ...data.user,
@@ -259,16 +254,14 @@ export default function FarmerProfile() {
               </IconButton>
               <input
                 type="file"
-                hidden
                 ref={fileInputRef}
-                accept="image/*"
+                style={{ display: "none" }}
                 onChange={handleImageChange}
-                disabled={loading}
               />
             </Box>
             <Box>
-              <Typography variant="h5">{farmerData.name}</Typography>
-              <Typography variant="body2">
+              <Typography variant="h6">{farmerData.name}</Typography>
+              <Typography variant="body2" color="text.secondary">
                 {farmerData.village}, {farmerData.state}
               </Typography>
             </Box>
@@ -288,7 +281,6 @@ export default function FarmerProfile() {
           </Box>
 
           <Divider sx={{ my: 2 }} />
-
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               Phone: {farmerData.mobile}
@@ -300,11 +292,12 @@ export default function FarmerProfile() {
               Farm Size: {farmerData.farmSize} acres
             </Grid>
             <Grid item xs={12} sm={6}>
-              Current Crop: {farmerData.crops.join(", ")}
+              Current Crop: {farmerData.presentCrop || "Not set"}
             </Grid>
           </Grid>
         </CardContent>
       </Card>
+
       {/* === Crop Progress Bar === */}
       <Card sx={{ borderRadius: 3, mb: 4 }}>
         <CardContent>
@@ -321,9 +314,7 @@ export default function FarmerProfile() {
       </Card>
 
       {/* === Crop History === */}
-      <Card
-        sx={{ borderRadius: 3, boxShadow: 3, backgroundColor: "#fff", mb: 3 }}
-      >
+      <Card sx={{ borderRadius: 3, boxShadow: 3, backgroundColor: "#fff", mb: 3 }}>
         <CardContent>
           <Typography variant="h6" gutterBottom>
             {translations.profile.cropHistory[language]}
@@ -337,19 +328,13 @@ export default function FarmerProfile() {
                     <strong>{translations.profile.cropYear[language]}</strong>
                   </TableCell>
                   <TableCell>
-                    <strong>
-                      {translations.profile.currentCrop[language]}
-                    </strong>
+                    <strong>{translations.profile.currentCrop[language]}</strong>
                   </TableCell>
                   <TableCell>
-                    <strong>
-                      {translations.profile.previousCrops[language]}
-                    </strong>
+                    <strong>{translations.profile.previousCrops[language]}</strong>
                   </TableCell>
                   <TableCell>
-                    <strong>
-                      {translations.profile.fertilizers[language]}
-                    </strong>
+                    <strong>{translations.profile.fertilizers[language]}</strong>
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -368,8 +353,8 @@ export default function FarmerProfile() {
         </CardContent>
       </Card>
 
+      {/* === Quick Navigation === */}
       <div style={{ display: "flex", justifyContent: "center", gap: "20px" }}>
-        {/* === Manage Loans === */}
         <div
           className="card"
           onClick={() => navigate("/dashboard/loans")}
@@ -386,7 +371,6 @@ export default function FarmerProfile() {
           <p>Manage Loans</p>
         </div>
 
-        {/* === Crop Cycle === */}
         <div
           className="card"
           onClick={() => navigate("/dashboard/cropcycle")}
@@ -405,12 +389,7 @@ export default function FarmerProfile() {
       </div>
 
       {/* === Edit Dialog === */}
-      <Dialog
-        open={isEditOpen}
-        onClose={handleEditClose}
-        maxWidth="sm"
-        fullWidth
-      >
+      <Dialog open={isEditOpen} onClose={handleEditClose} maxWidth="sm" fullWidth>
         <DialogTitle>Edit Farmer Details</DialogTitle>
         <DialogContent dividers>
           <Grid container spacing={2}>
@@ -421,6 +400,7 @@ export default function FarmerProfile() {
               { label: "Village", key: "village" },
               { label: "Land Type", key: "landType" },
               { label: "Farm Size", key: "farmSize", type: "number" },
+              { label: "Current Crop", key: "presentCrop" }, // ✅ new field
             ].map(({ label, key, type = "text" }) => (
               <Grid item xs={12} sm={6} key={key}>
                 <TextField
