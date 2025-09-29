@@ -4,6 +4,8 @@ import App from "./App";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import "./styles/home.css";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 <link
   href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600&display=swap"
@@ -29,5 +31,6 @@ root.render(
   <ThemeProvider theme={theme}>
     <CssBaseline />
     <App />
+    <ToastContainer position="bottom-right" autoClose={3000} />
   </ThemeProvider>
 );

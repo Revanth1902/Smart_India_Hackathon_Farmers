@@ -20,9 +20,12 @@ import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import paddyData from "../utils/paddy.json"; // Your JSON data
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-// --- Styled Components ---
+import paddyData from "../utils/paddy.json";
+
+// Styled components...
 const MainContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(3),
   maxWidth: 700,
@@ -93,13 +96,10 @@ const CropDayLabel = styled(Typography)({
   marginTop: "4px",
 });
 
-// --- Helper function to create safe CSS class names ---
-const sanitizeForClassName = (name) => {
-  return name.toLowerCase().replace(/[\s&]+/g, "-");
-};
+// Utility functions
+const sanitizeForClassName = (name) =>
+  name.toLowerCase().replace(/[\s&]+/g, "-");
 
-// --- NEW Helper function to format dates consistently in LOCAL time ---
-// This replaces .toISOString() and fixes the off-by-one error caused by timezones
 const formatDate = (date) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -107,7 +107,31 @@ const formatDate = (date) => {
   return `${year}-${month}-${day}`;
 };
 
-// --- Helper Function ---
+const STORAGE_KEY = "paddyCropProgress";
+
+const saveProgressToLocalStorage = (completedDay, flattenedData) => {
+  const savedAt = new Date().toISOString();
+  const completedDaysData = flattenedData.filter(
+    (day) => day.globalDay <= completedDay
+  );
+  const uniquePhases = [
+    ...new Set(completedDaysData.map((day) => day.phaseName)),
+  ];
+  const percentage =
+    flattenedData.length > 0
+      ? Math.round((completedDay / flattenedData.length) * 100)
+      : 0;
+
+  const dataToStore = {
+    completedDay,
+    savedAt,
+    stagesCompleted: uniquePhases.length,
+    percentage: `${percentage}%`,
+  };
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToStore));
+};
+
 const getFlattenedPhases = (phases, startDate) => {
   const allDays = [];
   let currentDate = new Date(startDate);
@@ -128,7 +152,6 @@ const getFlattenedPhases = (phases, startDate) => {
       }
       allDays.push({
         globalDay: globalDayCounter++,
-        // **FIX:** Use formatDate instead of toISOString()
         date: formatDate(currentDate),
         phaseName: phase.phase,
         subPhase: relevantDetail.sub_phase,
@@ -138,10 +161,10 @@ const getFlattenedPhases = (phases, startDate) => {
       currentDate.setDate(currentDate.getDate() + 1);
     }
   });
+
   return allDays;
 };
 
-// --- Main Component ---
 const CropTracker = () => {
   const theme = createTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -154,7 +177,7 @@ const CropTracker = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 4000); // 4-second loader
+    }, 4000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -162,19 +185,23 @@ const CropTracker = () => {
     () => getFlattenedPhases(paddyData.phases, cropStartDate),
     [cropStartDate]
   );
+
   const dayDataMap = useMemo(
     () => new Map(flattenedData.map((item) => [item.date, item])),
     [flattenedData]
   );
 
-  // **FIX:** Use formatDate for today's date as well
   const todayString = formatDate(new Date());
   const todayData = dayDataMap.get(todayString);
 
-  const totalDays =
-    flattenedData.length > 0
-      ? flattenedData[flattenedData.length - 1].globalDay
-      : 0;
+  // ✅ Save progress to localStorage automatically (even without button click)
+  useEffect(() => {
+    if (todayData && flattenedData.length > 0) {
+      saveProgressToLocalStorage(todayData.globalDay, flattenedData);
+    }
+  }, [todayData, flattenedData]);
+
+  const totalDays = flattenedData.length;
   const currentDay = todayData ? todayData.globalDay : 0;
   const progressPercentage = totalDays > 0 ? (currentDay / totalDays) * 100 : 0;
 
@@ -205,7 +232,6 @@ const CropTracker = () => {
 
   const getTileClassName = ({ date, view }) => {
     if (view === "month") {
-      // **FIX:** Use formatDate to look up the date
       const dateString = formatDate(date);
       const dayData = dayDataMap.get(dateString);
       if (dayData) {
@@ -217,7 +243,6 @@ const CropTracker = () => {
 
   const getTileContent = ({ date, view }) => {
     if (view === "month") {
-      // **FIX:** Use formatDate to look up the date
       const dateString = formatDate(date);
       const dayData = dayDataMap.get(dateString);
       if (dayData) {
@@ -228,7 +253,6 @@ const CropTracker = () => {
   };
 
   const handleDayClick = (date) => {
-    // **FIX:** Use formatDate to look up the clicked date
     const dateString = formatDate(date);
     const dayData = dayDataMap.get(dateString);
     setSelectedDay(dayData || null);
@@ -293,6 +317,7 @@ const CropTracker = () => {
             ))}
           </Box>
         </CalendarPaper>
+
         <Paper
           elevation={0}
           sx={{
@@ -325,11 +350,7 @@ const CropTracker = () => {
                 justifyContent: "center",
               }}
             >
-              <Typography
-                variant="caption"
-                component="div"
-                color="text.secondary"
-              >
+              <Typography variant="caption" component="div">
                 {`${Math.round(progressPercentage)}%`}
               </Typography>
             </Box>
@@ -338,6 +359,7 @@ const CropTracker = () => {
             Day {currentDay} of {totalDays}
           </Typography>
         </Paper>
+
         <Paper
           elevation={0}
           sx={{
@@ -364,6 +386,20 @@ const CropTracker = () => {
               <Typography variant="body2" sx={{ mt: 1 }}>
                 <strong>Precautions:</strong> {todayData.precautions}
               </Typography>
+              <DialogActions>
+                <Button
+                  onClick={() => {
+                    toast.success(
+                      `Marked Day ${todayData?.globalDay} as completed`
+                    );
+                    setSelectedDay(null);
+                  }}
+                  variant="contained"
+                  color="primary"
+                >
+                  Mark as Completed
+                </Button>
+              </DialogActions>
             </>
           ) : (
             <Typography
@@ -400,13 +436,11 @@ const CropTracker = () => {
           <DialogContent dividers>
             {selectedDay ? (
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-                <Typography variant="h6" component="div">
+                <Typography variant="h6">
                   Phase: <strong>{selectedDay.phaseName}</strong>
                 </Typography>
                 <Typography variant="body1">
-                  <strong>Date:</strong>{" "}
-                  {/* Display the stored YYYY-MM-DD string directly */}
-                  {selectedDay.date}
+                  <strong>Date:</strong> {selectedDay.date}
                 </Typography>
                 <Typography variant="body1">
                   <strong>Sub-phase:</strong> {selectedDay.subPhase}
@@ -426,6 +460,8 @@ const CropTracker = () => {
             <Button onClick={() => setSelectedDay(null)}>Close</Button>
           </DialogActions>
         </Dialog>
+
+        <ToastContainer position="bottom-center" />
       </MainContainer>
     </ThemeProvider>
   );

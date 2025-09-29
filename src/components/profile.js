@@ -27,6 +27,7 @@ import AgricultureIcon from "@mui/icons-material/Agriculture";
 import { MonetizationOn } from "@mui/icons-material";
 import UploadIcon from "@mui/icons-material/Upload";
 import { useNavigate } from "react-router-dom";
+import CropProgressBar from "./CropProgressbar"; // Import the new component
 
 import {
   Chart as ChartJS,
@@ -63,6 +64,23 @@ const cropHistory = [
     fertilizersUsed: ["Urea", "Compost"],
   },
 ];
+
+// Define crop stages and progress data
+const cropStages = [
+  "Land Preparation",
+  "Nursery Preparation & Seeding",
+  "Transplanting",
+  "Vegetative Stage",
+  "Reproductive Stage",
+  "Maturity & Harvest",
+];
+
+const cropProgress = {
+  completedDay: 34,
+  savedAt: "2025-09-29T10:56:44.760Z",
+  stagesCompleted: 4,
+  percentage: "32%",
+};
 
 export default function FarmerProfile() {
   const navigate = useNavigate();
@@ -285,6 +303,20 @@ export default function FarmerProfile() {
               Crops: {farmerData.crops.join(", ")}
             </Grid>
           </Grid>
+        </CardContent>
+      </Card>
+      {/* === Crop Progress Bar === */}
+      <Card sx={{ borderRadius: 3, mb: 4 }}>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>
+            Crop Progress
+          </Typography>
+          <CropProgressBar
+            stages={cropStages}
+            stagesCompleted={cropProgress.stagesCompleted}
+            percentage={cropProgress.percentage}
+            completedDay={cropProgress.completedDay}
+          />
         </CardContent>
       </Card>
 
